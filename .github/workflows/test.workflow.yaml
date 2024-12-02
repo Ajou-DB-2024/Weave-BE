@@ -24,12 +24,12 @@ jobs:
       # 3. Docker 이미지 빌드
       - name: Build Docker image
         run: |
-          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/fastapi-app:latest .
+          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/weave-be:latest .
 
       # 4. Docker 이미지 푸시
       - name: Push Docker image to Docker Hub
         run: |
-          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/fastapi-app:latest
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/weave-be:latest
 
       # 5. SSH로 원격 서버에서 업데이트 스크립트 실행
       - name: Deploy to Server via SSH
@@ -40,7 +40,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_SSH_PORT }}
           script: |
-            docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/fastapi-app:latest
-            docker stop fastapi-app || true
-            docker rm fastapi-app || true
-            docker run -d --name fastapi-app -p 8000:8000 ${{ secrets.DOCKER_HUB_USERNAME }}/fastapi-app:latest
+            docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/weave-be:latest
+            docker stop weave-be || true
+            docker rm weave-be || true
+            docker run -d --name weave-be -p 8000:8000 ${{ secrets.DOCKER_HUB_USERNAME }}/weave-be:latest
