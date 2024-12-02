@@ -1,7 +1,42 @@
 # Weave - BE
 Project Weave: 동아리 종합지원 관리서비스
 
-## A. How to Run
+## A. Architecture
+
+FastAPI를 협업하기 가장 좋은 형태로 사용하기 위해, Architecture는 MVC패턴을 계층형 기반으로 적절히 수정하여 적용하였습니다.
+각 폴더는 다음과 같은 역할을 수행합니다
+
+```bash
+/app
+  
+ ㄴ /apis: API도메인 별 디렉토리
+ ㄴ /common: API도메인 간 공통으로 사용되는 코드를 저장하는 디렉토리
+ ㄴ /middlewares: middlware 로직 디렉토리
+  
+ ㄴ config.py: .env parsing 파일
+ ㄴ db.py: DB Query전달 및 응답처리 함수를 담당하는 파일
+ ㄴ main.py: FastAPI 서버생성 및 flow handling 파일
+
+/logs: 로그저장 디렉토리 (내부에 파일이 자동으로 생성됩니다)
+```
+
+`/apis` 내에 저장되는 API 도메인은 다음과 같이 구성되어 있습니다:
+
+```bash
+/[DOMAIN_NAME]
+
+ ㄴ /repository: db 접근관련 로직 디렉토리
+  ㄴ query.py: 과목과제 보고서를 위한 파일; 상수형태로 DB Query 관리
+  ㄴ repository.py: query.py에서 상수형태의 query를 가져와 실행
+
+ ㄴ /service: repository 내의 함수에서 데이터를 받아 원하는 형식으로 가공하는 로직을 관리하는 디렉토리
+  ㄴ [적절한_이름별로_구분된_service_파일명].py
+
+ ㄴ /router: service 내의 함수에서 결과를 받아 요청을 직접 처리하는 코드를 담은 디렉토리
+  ㄴ router.py: service 내의 함수에서 결과를 받아 요청을 직접 처리
+```
+
+## B. How to Run
 
 > Docker를 사용하는 방법과 사용하지 않는 방법으로 2가지 경우를 정리해두었습니다.
 상황에 따라 적절히 선택해 테스트하시기 바랍니다.
