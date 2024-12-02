@@ -1,7 +1,28 @@
 # Weave - BE
 Project Weave: 동아리 종합지원 관리서비스
 
-## A. Architecture
+## A. 시작하기 앞서
+
+- 모든 작업은 반드시 `dev/[사용자_닉네임]` branch에서 작업 후 main으로 merge 주셔야 합니다
+  - git push 하셔도 ruleset 걸어둬서 안됩니다.
+- Git Message Convention은 권장드리지만, 시간제한 상 **강제하지 않겠습니다**
+- Git PR Convention은 적용을 권장드립니다. 아래 양식을 참고하여 PR 부탁드립니다
+  - 제목예시: `Feat: TestAPI Gateway 추가`
+  - 형식:
+    ```markdown
+      # Feat: TestAPI Gateway 추가
+      ---
+
+      ## 주요 수정사항
+      - 수정사항을 목록으로 작성
+      - 간단하게만 언급
+      - 우측 'Reviewers'에 팀원들 선택
+      - 'Assignees'에는 본인 선택
+      - PR 올리고 카톡으로도 알려주기!
+    ```
+- publish로 올라가는 PR은 merge 즉시 자동배포됩니다. 아직 설정이 완벽하지 않아서, 이건 완료되는대로 다시 공유하겠습니다
+
+## B. Architecture
 
 FastAPI를 협업하기 가장 좋은 형태로 사용하기 위해, Architecture는 MVC패턴을 계층형 기반으로 적절히 수정하여 적용하였습니다.
 각 폴더는 다음과 같은 역할을 수행합니다
@@ -36,7 +57,7 @@ FastAPI를 협업하기 가장 좋은 형태로 사용하기 위해, Architectur
   ㄴ router.py: service 내의 함수에서 결과를 받아 요청을 직접 처리
 ```
 
-## B. How to Run
+## C. How to Run
 
 > Docker를 사용하는 방법과 사용하지 않는 방법으로 2가지 경우를 정리해두었습니다.
 상황에 따라 적절히 선택해 테스트하시기 바랍니다.
