@@ -4,6 +4,8 @@ from app.config import settings
 from fastapi import FastAPI
 from app.middlewares.log import log_requests
 
+from app.apis.TestAPI.router import router as TestRouter
+
 # FastAPI 앱 생성
 app = FastAPI(
     title="Weave API",  # 프로젝트 이름
@@ -12,6 +14,7 @@ app = FastAPI(
 )
 
 # 라우터 등록
+app.include_router(TestRouter.router, prefix="/api/v0", tags=["Test"])
 
 # 미들웨어나 이벤트 핸들러 추가 가능
 @app.middleware("http")
