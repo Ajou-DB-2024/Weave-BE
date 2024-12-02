@@ -7,8 +7,10 @@ class Settings(BaseSettings):
     MYSQL_PASSWORD: str
     MYSQL_DB: str
 
-    SERVICE_DOMAIN: str
-    SERVICE_PORT: str
+    HOST: str
+    PORT: int
+
+    PY_ENV: str
 
     class Config:
         env_file = ".env"

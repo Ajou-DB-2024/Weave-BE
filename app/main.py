@@ -1,22 +1,31 @@
-# app/main.py
+import uvicorn
+from app.config import settings
+
 from fastapi import FastAPI
-from app.routers import example_router  # 라우터 모듈 임포트
+from app.middlewares.log import log_requests
+
+from app.apis.TestAPI.router import router as TestRouter
 
 # FastAPI 앱 생성
 app = FastAPI(
-    title="My FastAPI Project",  # 프로젝트 이름
-    description="This is a sample FastAPI project.",  # 설명
+    title="Weave API",  # 프로젝트 이름
+    description="[Ajou Univ.] 2024-2 DB 팀 프로젝트 Backend",  # 설명
     version="0.1.0",  # API 버전
 )
 
 # 라우터 등록
-app.include_router(example_router.router, prefix="/api/v1", tags=["Example"])
+app.include_router(TestRouter.router, prefix="/api/v0", tags=["Test"])
 
 # 미들웨어나 이벤트 핸들러 추가 가능
-@app.on_event("startup")
-async def startup_event():
-    print("Application is starting...")
+@app.middleware("http")
+async def middleware_wrapper(request, call_next):
+    return await log_requests(request, call_next)
 
-@app.on_event("shutdown")
-async def shutdown_event():
-    print("Application is shutting down...")
+# 애플리케이션 실행
+if __name__ == "__main__":
+    uvicorn.run(
+        "app.main:app",  # "파일명:FastAPI 인스턴스"
+        host=settings.HOST,  # 호스트 주소 (로컬호스트)
+        port=settings.PORT,        # 포트 번호
+        reload=settings.PY_ENV == "development" # 코드 변경 시 자동 재시작 (개발용 옵션)
+    )
