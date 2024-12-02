@@ -1,4 +1,4 @@
-name: Docker Build and Deploy
+name: Publish CD Workflow
 
 on:
   push:
@@ -21,17 +21,28 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-      # 3. Docker 이미지 빌드
+      # 3. 현재 시간 기반 태그 생성
+      - name: Generate version tag
+        id: generate_tag
+        run: |
+          # 버전 번호 기본값
+          VERSION="v.1.0.0"
+          # 현재 시간을 초 단위로 가져오기
+          TIMESTAMP=$(date +'%H%M%S')
+          # 최종 태그 생성
+          echo "TAG=${VERSION}.${TIMESTAMP}" >> $GITHUB_ENV
+
+      # 4. Docker 이미지 빌드
       - name: Build Docker image
         run: |
-          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/weave-be:latest .
+          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/weave-be:${{ env.TAG }} .
 
-      # 4. Docker 이미지 푸시
+      # 5. Docker 이미지 푸시
       - name: Push Docker image to Docker Hub
         run: |
-          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/weave-be:latest
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/weave-be:${{ env.TAG }}
 
-      # 5. SSH로 원격 서버에서 업데이트 스크립트 실행
+      # 6. SSH로 원격 서버에서 업데이트 스크립트 실행
       - name: Deploy to Server via SSH
         uses: appleboy/ssh-action@v0.1.9
         with:
@@ -40,7 +51,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_SSH_PORT }}
           script: |
-            docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/weave-be:latest
+            docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/weave-be:${{ env.TAG }}
             docker stop weave-be || true
             docker rm weave-be || true
-            docker run -d --name weave-be -p 8000:8000 ${{ secrets.DOCKER_HUB_USERNAME }}/weave-be:latest
+            docker run -d --name weave-be -p 8000:8000 ${{ secrets.DOCKER_HUB_USERNAME }}/weave-be:${{ env.TAG }}
