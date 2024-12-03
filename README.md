@@ -120,7 +120,7 @@ pip install -r requirements.txt
 #### 3. 서버 실행
 
 ```bash
-uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+python -m app.main
 ```
 
 콘솔에 다음과 같이 표시되면 서버가 정상적으로 실행 중이라는 뜻입니다:
