@@ -62,8 +62,8 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_SSH_PORT }}
           script: |
-            docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/weave-be:${{ env.TAG }}
+            docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/weave-be:latest
             docker stop weave-be || true
             docker rm weave-be || true
-            docker run -d --name weave-be -p 8000:8000 ${{ secrets.DOCKER_HUB_USERNAME }}/weave-be:${{ env.TAG }}
+            docker run -d --name weave-be -p 8000:8000 ${{ secrets.DOCKER_HUB_USERNAME }}/weave-be:latest
             docker ps
