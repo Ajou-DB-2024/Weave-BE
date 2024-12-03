@@ -6,7 +6,7 @@ on:
       - publish
 
 jobs:
-  build-and-deploy:
+  image build:
     runs-on: ubuntu-latest
 
     steps:
@@ -42,6 +42,10 @@ jobs:
         run: |
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/weave-be:${{ env.TAG }}
 
+  service deploy:
+    runs-on: ubuntu-latest
+
+    steps:
       # 6. SSH로 원격 서버에서 업데이트 스크립트 실행
       - name: Deploy to Server via SSH
         uses: appleboy/ssh-action@v0.1.9
@@ -55,3 +59,4 @@ jobs:
             docker stop weave-be || true
             docker rm weave-be || true
             docker run -d --name weave-be -p 8000:8000 ${{ secrets.DOCKER_HUB_USERNAME }}/weave-be:${{ env.TAG }}
+            docker ps
