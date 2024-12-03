@@ -37,10 +37,16 @@ jobs:
         run: |
           docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/weave-be:${{ env.TAG }} .
 
+      # 4-1. Docker 이미지 태그 추가
+      - name: Tag Docker image
+        run: |
+          docker image tag ${{ secrets.DOCKER_HUB_USERNAME }}/weave-be:${{ env.TAG }} ${{ secrets.DOCKER_HUB_USERNAME }}/weave-be:latest
+
       # 5. Docker 이미지 푸시
       - name: Push Docker image to Docker Hub
         run: |
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/weave-be:${{ env.TAG }}
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/weave-be:latest
 
   service-deploy:
     runs-on: ubuntu-latest
