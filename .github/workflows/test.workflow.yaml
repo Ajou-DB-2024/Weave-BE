@@ -6,7 +6,7 @@ on:
       - publish
 
 jobs:
-  image build:
+  image-build:
     runs-on: ubuntu-latest
 
     steps:
@@ -42,7 +42,7 @@ jobs:
         run: |
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/weave-be:${{ env.TAG }}
 
-  service deploy:
+  service-deploy:
     runs-on: ubuntu-latest
 
     steps:
