@@ -2,4 +2,4 @@ fastapi
 uvicorn
 pymysql
 python-dotenv
-pydantic
+pydantic_settings
