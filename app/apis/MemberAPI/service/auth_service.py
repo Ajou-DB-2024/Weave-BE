@@ -1,11 +1,15 @@
 from fastapi import HTTPException, Request
 
 from .college_service import AjouService
-
+from ..repository import repository as MemberRepository
 
 import requests 
 import urllib.parse
+from jose import JWTError, jwt
+from passlib.context import CryptContext
+from datetime import datetime, timedelta
 
+from app.apis.MemberAPI.model import Member
 from app.config import settings
 
 API_SCOPES = [
@@ -85,3 +89,58 @@ class GCPService:
        "university": univ_info
     }
 
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# JWT 설정
+SECRET_KEY = settings.TOKEN_SECRET  # 실제로는 보안에 취약하지 않은 랜덤한 값으로 설정해야 합니다.
+ALGORITHM = "HS256"
+LOGIN_PERSIST_MINUTE = 30
+
+def check_jwt_format(payload: dict):
+  for key in ['sub', 'name', 'email', 'iat', 'exp']:
+    if key not in payload:
+      return False
+  return True
+
+class WeaveAuthService:
+
+  def find_member_by_id(id: int) -> Member.Member | None:
+    members = MemberRepository.find_members_by_id(id)
+    if len(members) == 0:
+      return None
+    
+    return members[0]
+
+  def find_member_by_email(email: str) -> Member.Member | None:
+    members = MemberRepository.find_members_by_email(email)
+    if len(members) == 0:
+      return None
+    
+    return members[0]
+
+  def create_token(data: Member.ExtendedMember):
+    iat = datetime.utcnow()
+    payload = {
+      'sub': data.id,
+      'name': data.name,
+      'email': data.email,
+      'college': data.university.college,
+      'department': data.university.department,
+      'iat': iat,
+      'exp': iat + timedelta(minutes=LOGIN_PERSIST_MINUTE)
+    }
+
+    encoded_jwt = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+  def authorize_token(token: str):
+    try:
+      payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+
+      # username: str = payload.get("sub")
+      if check_jwt_format(payload):
+        raise { "result": False }
+    except JWTError:
+        raise { "result": False }
+
+    return { "result": True }
