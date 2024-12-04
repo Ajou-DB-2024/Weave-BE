@@ -1,11 +1,16 @@
-from fastapi import HTTPException, Request
+from typing import Dict
+from fastapi import Depends, HTTPException, Request
+from fastapi.security import OAuth2PasswordBearer
+
+from app.apis.MemberAPI.model.GoogleToken import GoogleOAuthToken
 
 from .college_service import AjouService
 from ..repository import repository as MemberRepository
 
+import jwt
 import requests 
 import urllib.parse
-from jose import JWTError, jwt
+
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
 
@@ -35,7 +40,7 @@ class GCPService:
   def get_auth_url():
     return AUTH_URL
 
-  def get_token(request: Request):
+  def get_token(request: Request) -> GoogleOAuthToken:
 
     code = request.query_params.get("code")
 
@@ -64,7 +69,7 @@ class GCPService:
     token_info = response.json()
     return token_info
 
-  def get_user_depart(token: str):
+  def get_member_depart(token: str) -> Member.Member:
 
     response = requests.get(
       url="https://people.googleapis.com/v1/people/me?personFields=names,coverPhotos,photos,emailAddresses,organizations,memberships", 
@@ -74,18 +79,16 @@ class GCPService:
     if response.status_code != 200:
       raise HTTPException(status_code=400, detail="Failed to get user info")
 
-    user_info = response.json()
-    univ_info = AjouService.get_univ_depart(user_info['organizations'][0]['department'])
+    member_info = response.json()
+
+    univ_info = AjouService.get_univ_depart(member_info['organizations'][0]['department'])
     if not univ_info:
       raise HTTPException(status_code=400, detail="Failed to get univ info")
-    univ_info['course'] = {
-      "type": AjouService.get_univ_course(user_info['organizations'][0]['jobDescription']),
-      "grade": user_info['organizations'][0]['title']
-    }
+    univ_info['grade'] = member_info['organizations'][0]['title']
 
     return {
-       "name": user_info['names'][0]['displayName'],
-       "email": user_info['emailAddresses'][0]['value'],
+       "name": member_info['names'][0]['displayName'],
+       "email": member_info['emailAddresses'][0]['value'],
        "university": univ_info
     }
 
@@ -93,8 +96,10 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # JWT 설정
 SECRET_KEY = settings.TOKEN_SECRET  # 실제로는 보안에 취약하지 않은 랜덤한 값으로 설정해야 합니다.
-ALGORITHM = "HS256"
+ALGORITHM = settings.TOKEN_ALGORITHM
 LOGIN_PERSIST_MINUTE = 30
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 def check_jwt_format(payload: dict):
   for key in ['sub', 'name', 'email', 'iat', 'exp']:
@@ -105,42 +110,113 @@ def check_jwt_format(payload: dict):
 class WeaveAuthService:
 
   def find_member_by_id(id: int) -> Member.Member | None:
-    members = MemberRepository.find_members_by_id(id)
-    if len(members) == 0:
-      return None
+    saved_member = MemberRepository.find_member(id)
     
-    return members[0]
+    major = saved_member.pop("major")
+    grade = saved_member.pop("grade")
+    saved_member["university"] = AjouService.get_univ_depart(major)
+    saved_member["university"]["grade"] = grade
+
+    return saved_member
 
   def find_member_by_email(email: str) -> Member.Member | None:
     members = MemberRepository.find_members_by_email(email)
     if len(members) == 0:
       return None
     
-    return members[0]
+    saved_member = members[0]
+    
+    major = saved_member.pop("major")
+    grade = saved_member.pop("grade")
+    saved_member["university"] = AjouService.get_univ_depart(major)
+    saved_member["university"]["grade"] = grade
+    
+    return saved_member
 
-  def create_token(data: Member.ExtendedMember):
+  def join(member_info: Member.CommonMember) -> Member.Member:
+    print(member_info)
+    member = MemberRepository.create_member(member_info)
+    
+    major = member.pop("major")
+    grade = member.pop("grade")
+    member["university"] = AjouService.get_univ_depart(major)
+    member["university"]["grade"] = grade
+
+    return member
+
+  def login(univ_member: Member.Member, gcp_token: GoogleOAuthToken):
+    try:
+      service_member_info = WeaveAuthService.find_member_by_email(univ_member['email'])
+      is_member_autojoined = False
+      
+      if not service_member_info:
+        is_member_autojoined = True
+        service_member_info = WeaveAuthService.join(univ_member)
+
+      MemberRepository.save_gcp_token(service_member_info['id'], gcp_token)
+      
+      login_jwt = WeaveAuthService.create_token(service_member_info)
+
+      return {
+        "result": True, 
+        "member": service_member_info,
+        "auto_joined": is_member_autojoined,
+        "jwt": login_jwt
+      }
+    
+    except Exception as e:
+      print(e)
+      return {"result": False}
+
+  def create_token(member: Member.Member) -> str:
+    
     iat = datetime.utcnow()
     payload = {
-      'sub': data.id,
-      'name': data.name,
-      'email': data.email,
-      'college': data.university.college,
-      'department': data.university.department,
+      'sub': member['id'],
+      'name': member['name'],
+      'email': member['email'],
       'iat': iat,
       'exp': iat + timedelta(minutes=LOGIN_PERSIST_MINUTE)
     }
 
     encoded_jwt = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+
     return encoded_jwt
 
   def authorize_token(token: str):
     try:
-      payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+      payload = jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
 
-      # username: str = payload.get("sub")
-      if check_jwt_format(payload):
-        raise { "result": False }
-    except JWTError:
-        raise { "result": False }
+      if not check_jwt_format(payload):
+        raise Exception("Invalid JWT Format")
+      
+      return {
+        "result": True,
+        "member_id": payload.get('sub')
+      }
+    except Exception as e:
+        print(e)
+        return {
+          "result": False
+        }
 
-    return { "result": True }
+  def digest_token(token: str = Depends(oauth2_scheme)) -> Member.Member | None:
+    try:
+      auth_result = WeaveAuthService.authorize_token(token)
+      print(auth_result)
+      if not auth_result['result']:
+        raise Exception("Authorization Failed")
+      
+      member_info = WeaveAuthService.find_member_by_id(auth_result['member_id'])
+      return {
+        "result": True,
+        "is_logined": member_info is not None,
+        "logined_member": member_info
+      }
+    
+    except Exception as e:
+        print(e)
+        return {
+          "result": False
+        }
+
