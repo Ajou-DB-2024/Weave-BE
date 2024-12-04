@@ -10,7 +10,6 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_ID: str
     GOOGLE_CLIENT_SECRET: str
 
-    HOST: str
     PORT: int
 
     TOKEN_SECRET: str
