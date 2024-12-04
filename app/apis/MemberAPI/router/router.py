@@ -7,9 +7,9 @@ from app.common.response.formatter import error_response, success_response
 router = APIRouter()
 
 @router.get("/login")
-async def get_login_url():
+async def get_login_url(request: Request):
   try:
-    authorization_url = GCPService.get_auth_url()
+    authorization_url = GCPService.get_auth_url(request.client.host)
     return success_response(data={
       "url": authorization_url
     })
