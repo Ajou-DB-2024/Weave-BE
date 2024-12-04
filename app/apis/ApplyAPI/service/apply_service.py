@@ -41,3 +41,10 @@ class ApplyService:
             )
         
         return {"submission_id": submission_id}
+    
+    @staticmethod
+    def get_submission(submission_id: int) -> dict:
+        submission = ApplyRepository.get_submission_by_id(submission_id)
+        if not submission:
+            raise Exception(f"No submission found with ID {submission_id}")
+        return submission

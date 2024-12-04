@@ -42,3 +42,14 @@ async def save_submission(data: SubmissionSave):
         return JSONResponse(content=success_response(data=response_data))
     except Exception as e:
         return error_response(error="DATABASE_ERROR", message=str(e))
+    
+@router.get("/apply/submission/{submission_id}")
+async def get_submission(submission_id: int):
+    """
+    특정 submission_id에 해당하는 지원서를 조회합니다.
+    """
+    try:
+        submission = ApplyService.get_submission(submission_id)
+        return success_response(data=submission)
+    except Exception as e:
+        return error_response(error="SUBMISSION_NOT_FOUND", message=str(e))

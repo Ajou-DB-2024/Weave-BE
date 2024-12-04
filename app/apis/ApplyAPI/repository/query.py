@@ -23,3 +23,20 @@ SELECT id AS submission_id
 FROM SUBMISSION
 WHERE recruit_id = %s AND member_id = %s AND form_id = %s AND title = %s;
 """
+
+GET_SUBMISSION_BY_ID = """
+SELECT
+    s.id AS submission_id,
+    s.title AS submission_title,
+    s.is_submitted,
+    s.is_announced,
+    s.result,
+    s.submitted_at,
+    r.name AS recruit_name,
+    m.name AS member_name,
+    m.email AS member_email
+FROM SUBMISSION s
+LEFT JOIN RECRUIT r ON s.recruit_id = r.id
+LEFT JOIN MEMBER m ON s.member_id = m.id
+WHERE s.id = %s;
+"""
