@@ -6,6 +6,7 @@ WORKDIR /app
 
 # 필요한 파일 복사
 COPY ./app /app/app
+COPY ./data /app/data
 COPY requirements.txt /app
 
 # 의존성 설치
