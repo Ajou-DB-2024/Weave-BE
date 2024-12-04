@@ -82,6 +82,8 @@ class GCPService:
     member_info = response.json()
 
     univ_info = AjouService.get_univ_depart(member_info['organizations'][0]['department'])
+    print(univ_info, member_info['organizations'][0]['department'], member_info)
+
     if not univ_info:
       raise HTTPException(status_code=400, detail="Failed to get univ info")
     univ_info['grade'] = member_info['organizations'][0]['title']
