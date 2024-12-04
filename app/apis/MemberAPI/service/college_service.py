@@ -7,13 +7,13 @@ DEPARTMAP_FILEDIR = os.path.join(os.path.dirname(__file__), "../../../../", "dat
 try:
   with open(DEPARTMAP_FILEDIR, 'r', encoding='utf-8') as f:
     DEPART_MAP = json.load(f)
-    print(DEPART_MAP)
 except FileNotFoundError:
   pass
 
 class AjouService:
 
   def get_univ_depart(major: str):
+    print(DEPART_MAP)
     try:
       search_major = major.replace("전공", "")
       
