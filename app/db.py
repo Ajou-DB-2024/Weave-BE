@@ -36,6 +36,11 @@ def run_query(sql: str, params: Tuple[Any, ...] = ()) -> List[dict]:
             
             # INSERT, UPDATE, DELETE 쿼리일 경우 커밋
             connection.commit()
+            
+            # INSERT 쿼리일 경우 입력값의 id 반환
+            if sql.strip().lower().startswith("insert"):
+                return cursor.lastrowid
+
             return []
     except Exception as e:
         print(f"Database query failed: {e}")
