@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from app.middlewares.log import log_requests
 
 from app.apis.TestAPI.router import router as TestRouter
+from app.apis.MemberAPI.router import router as MemberRouter
 
 # FastAPI 앱 생성
 app = FastAPI(
@@ -15,6 +16,7 @@ app = FastAPI(
 
 # 라우터 등록
 app.include_router(TestRouter.router, prefix="/api/v0", tags=["Test"])
+app.include_router(MemberRouter.router, prefix="/api/v0", tags=["Member"])
 
 # 미들웨어나 이벤트 핸들러 추가 가능
 @app.middleware("http")
