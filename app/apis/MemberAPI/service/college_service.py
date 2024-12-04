@@ -1,11 +1,13 @@
 import json
 import os
+import traceback
 
 DEPART_MAP = {}
 DEPARTMAP_FILEDIR = os.path.join(os.path.dirname(__file__), "../../../../", "data", "departmap.json")
 try:
   with open(DEPARTMAP_FILEDIR, 'r', encoding='utf-8') as f:
     DEPART_MAP = json.load(f)
+    print(DEPART_MAP)
 except FileNotFoundError:
   pass
 
@@ -25,7 +27,9 @@ class AjouService:
         "major": major
       }
 
-    except Exception:
+    except Exception as e:
+      print(e)
+      traceback.format_exc()
       return None
 
   def get_univ_course(job: str):
