@@ -3,3 +3,9 @@ uvicorn
 pymysql
 python-dotenv
 pydantic_settings
+
+jose
+passlib
+
+google
+google_auth_oauthlib
