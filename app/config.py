@@ -7,8 +7,14 @@ class Settings(BaseSettings):
     MYSQL_PASSWORD: str
     MYSQL_DB: str
 
+    GOOGLE_CLIENT_ID: str
+    GOOGLE_CLIENT_SECRET: str
+
     HOST: str
     PORT: int
+
+    TOKEN_SECRET: str
+    TOKEN_ALGORITHM: str
 
     PY_ENV: str
 
