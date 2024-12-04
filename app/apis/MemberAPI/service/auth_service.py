@@ -1,3 +1,4 @@
+import traceback
 from typing import Dict
 from fastapi import Depends, HTTPException, Request
 from fastapi.security import OAuth2PasswordBearer
@@ -23,7 +24,7 @@ API_SCOPES = [
   "https://www.googleapis.com/auth/directory.readonly"
 ]
 
-REDIRECT_URL = f"http://[__HOST__]:{settings.PORT}/api/v0/login/redirect"
+REDIRECT_URL = settings.GOOGLE_REDIRECT_URL
 
 AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth?scope=%s&access_type=offline&login_hint=%s&response_type=code&redirect_uri=%s&client_id=%s&prompt=consent" % (
     " ".join(API_SCOPES),
@@ -34,11 +35,8 @@ AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth?scope=%s&access_type=of
 
 class GCPService:
 
-  def get_auth_url(host: str):
-    if host == "127.0.0.1":
-      host = "localhost"
-
-    return AUTH_URL.replace("[__HOST__]", host)
+  def get_auth_url():
+    return AUTH_URL
 
   def get_token(request: Request) -> GoogleOAuthToken:
 
@@ -56,7 +54,7 @@ class GCPService:
         'code': code,
         'client_id': settings.GOOGLE_CLIENT_ID,
         'client_secret': settings.GOOGLE_CLIENT_SECRET,
-        'redirect_uri': REDIRECT_URL.replace("[__HOST__]", host),
+        'redirect_uri': REDIRECT_URL,
         'grant_type': 'authorization_code'
     }
 
@@ -163,6 +161,7 @@ class WeaveAuthService:
     
     except Exception as e:
       print(e)
+      traceback.print_exc()
       return {"result": False}
 
   def create_token(member: Member.Member) -> str:
