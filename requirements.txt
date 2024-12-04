@@ -5,6 +5,7 @@ python-dotenv
 pydantic_settings
 
 jose
+PyJwt
 passlib
 
 google
