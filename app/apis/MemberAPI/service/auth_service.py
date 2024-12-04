@@ -61,9 +61,7 @@ class GCPService:
 
     # 응답 확인
     if response.status_code != 200:
-        
         print(f"Failed to get access token. Status Code: {response.status_code}, Response: {response.text}")
-
         raise HTTPException(status_code=400, detail="Failed to get access token")
     
     token_info = response.json()
@@ -134,14 +132,9 @@ class WeaveAuthService:
     return saved_member
 
   def join(member_info: Member.CommonMember) -> Member.Member:
-    print(member_info)
     member = MemberRepository.create_member(member_info)
-    
-    major = member.pop("major")
-    grade = member.pop("grade")
-    member["university"] = AjouService.get_univ_depart(major)
-    member["university"]["grade"] = grade
 
+    print(f"User Joined: {member['name']} | {member['university']['college']} {member['university']['department']} {member['university']['grade']}")
     return member
 
   def login(univ_member: Member.Member, gcp_token: GoogleOAuthToken):
@@ -154,7 +147,7 @@ class WeaveAuthService:
         service_member_info = WeaveAuthService.join(univ_member)
 
       MemberRepository.save_gcp_token(service_member_info['id'], gcp_token)
-      
+
       login_jwt = WeaveAuthService.create_token(service_member_info)
 
       return {

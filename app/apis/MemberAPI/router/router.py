@@ -37,6 +37,5 @@ async def handle_login_redirect(request: Request):
 
 @router.get("/profile")
 async def get_logined_info(current_user: Member.Member = Depends(WeaveAuthService.digest_token)):
-  print(current_user)
   return success_response(data=current_user)
   

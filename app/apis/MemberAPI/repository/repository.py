@@ -30,8 +30,8 @@ def find_members_by_email(email: str) -> List[Member.DBSavedMember]:
     service_member = DBQueryRunner.run_query(query.MEMBER_FINDBY_EMAIL, email)
     return service_member
 
-def create_member(user_info: Member.Member) -> Member.DBSavedMember:
-    service_member = DBQueryRunner.run_query(
+def create_member(user_info: Member.Member) -> Member.Member:
+    member_id = DBQueryRunner.run_query(
         query.MEMBER_CREATE,
         (
             user_info['name'], user_info['email'], 
@@ -39,6 +39,7 @@ def create_member(user_info: Member.Member) -> Member.DBSavedMember:
             user_info['university']['grade']
         )
     )
-    return service_member
+    user_info['id'] = member_id
+    return user_info
 
     
