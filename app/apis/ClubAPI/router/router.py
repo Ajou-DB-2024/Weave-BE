@@ -1,22 +1,17 @@
 from fastapi import APIRouter, Query, HTTPException
 from typing import List, Optional
-from app.apis.ClubAPI.service.club_service import find_clubs, create_new_club, update_club_information
-from pydantic import BaseModel
+from app.apis.ClubAPI.service.club_service import find_clubs, create_new_club, update_club_information, get_club_brief
+from app.apis.ClubAPI.Models.clubmodel import ClubDetail, ClubBriefResponse
 
 router = APIRouter()
 
-class ClubDetail(BaseModel):
-    name: str
-    club_depart: str
-    club_type: str
-    president_id: int
-    description: Optional[str] = None
-    study_count: Optional[int] = None
-    award_count: Optional[int] = None
-    edu_count: Optional[int] = None
-    event_count: Optional[int] = None
-    established_date: Optional[str] = None
-    location: Optional[str] = None
+@router.get("/club/brief", response_model=ClubBriefResponse)
+async def club_brief(club_id: int):
+    try:
+        result = get_club_brief(club_id)
+        return result
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
 @router.patch("/club/detail")
 async def update_club_detail(request: ClubDetail):

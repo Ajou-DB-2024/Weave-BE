@@ -31,7 +31,6 @@ def create_club(name: str, club_depart: str, club_type: str, president_id: int) 
     if check_club_exists(name):
         raise ValueError("Club name already exists")
 
-
     run_query(query.ADD_CLUB, (name, club_depart, club_type))
     
     # 동아리 id를 반환
@@ -57,3 +56,11 @@ def update_club_detail(club_id: int, description: Optional[str] = None, study_co
     result = run_query(query.UPDATE_CLUB_DETAIL, values)
     if result:
         raise ValueError("detail value error.")
+
+def get_club_brief_summary(club_id: int) -> dict:
+    result = run_query(query.GET_CLUB_SUMMARY, (club_id, club_id))
+
+    if not result:
+        raise ValueError("동아리가 없습니다.")
+
+    return result[0]

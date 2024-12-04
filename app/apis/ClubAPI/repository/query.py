@@ -28,3 +28,11 @@ UPDATE_CLUB_DETAIL = """
         event_count = %s, established_date = %s, location = %s
     WHERE club_id = %s
     """
+
+GET_CLUB_SUMMARY = """
+    SELECT 
+        (SELECT COUNT(DISTINCT member_id) FROM BELONGING WHERE club_id = %s) AS total_members,
+        (SELECT COUNT(DISTINCT submission.id) FROM SUBMISSION submission 
+         JOIN RECRUIT recruit ON submission.recruit_id = recruit.id
+         WHERE recruit.club_id = %s AND submission.is_submitted = TRUE) AS total_submissions
+    """

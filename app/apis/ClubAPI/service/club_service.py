@@ -1,5 +1,5 @@
 from typing import List, Optional
-from app.apis.ClubAPI.repository.repository import find_club_by_name, find_clubs_by_tags, create_club, update_club_detail
+from app.apis.ClubAPI.repository.repository import find_club_by_name, find_clubs_by_tags, create_club, update_club_detail, get_club_brief_summary
 from app.common.response.formatter import success_response, error_response
 
 def find_clubs(name: Optional[str] = None, club_id: Optional[int] = None, tag_ids: Optional[List[int]] = None):
@@ -35,3 +35,7 @@ def update_club_information(club_id: int, description: Optional[str], study_coun
     #동아리 소개 정보를 수정하는 서비스 함수.
     
     update_club_detail(club_id, description, study_count, award_count, edu_count, event_count, established_date, location)
+
+
+def get_club_brief(club_id: int) -> dict:
+    return get_club_brief_summary(club_id)
