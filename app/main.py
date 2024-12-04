@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from app.middlewares.log import log_requests
 
 from app.apis.TestAPI.router import router as TestRouter
+from app.apis.MemberAPI.router import router as MemberRouter
 from app.apis.FormAPI.router import router as FormRouter
 from app.apis.ApplyAPI.router import router as ApplyRouter
 
@@ -17,11 +18,8 @@ app = FastAPI(
 
 # 라우터 등록
 app.include_router(TestRouter.router, prefix="/api/v0", tags=["Test"])
-
-# dev/newbiehwang FormAPI router 추가
+app.include_router(MemberRouter.router, prefix="/api/v0", tags=["Member"])
 app.include_router(FormRouter.router, prefix="/api/v0", tags=["Form"])
-
-# dev/newbiehwang ApplyAPI router 추가
 app.include_router(ApplyRouter.router, prefix="/api/v0", tags=["Apply"])
 
 # 미들웨어나 이벤트 핸들러 추가 가능

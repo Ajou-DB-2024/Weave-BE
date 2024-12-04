@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     PORT: int
 
     TOKEN_SECRET: str
+    TOKEN_ALGORITHM: str
 
     PY_ENV: str
 
