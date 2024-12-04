@@ -23,10 +23,7 @@ API_SCOPES = [
   "https://www.googleapis.com/auth/directory.readonly"
 ]
 
-REDIRECT_URL = "http://%s:%s/api/v0/login/redirect"%(
-  settings.HOST,
-  settings.PORT
-)
+REDIRECT_URL = f"http://[__HOST__]:{settings.PORT}/api/v0/login/redirect"
 
 AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth?scope=%s&access_type=offline&login_hint=%s&response_type=code&redirect_uri=%s&client_id=%s&prompt=consent" % (
     " ".join(API_SCOPES),
@@ -37,8 +34,11 @@ AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth?scope=%s&access_type=of
 
 class GCPService:
 
-  def get_auth_url():
-    return AUTH_URL
+  def get_auth_url(host: str):
+    if host == "127.0.0.1":
+      host = "localhost"
+
+    return AUTH_URL.replace("[__HOST__]", host)
 
   def get_token(request: Request) -> GoogleOAuthToken:
 
@@ -48,11 +48,15 @@ class GCPService:
       raise HTTPException(status_code=400, detail="Code not found")
     
     # 토큰 요청을 위한 데이터
+    host = request.client.host
+    if host == "127.0.0.1":
+      host = "localhost"
+    
     token_data = {
         'code': code,
         'client_id': settings.GOOGLE_CLIENT_ID,
         'client_secret': settings.GOOGLE_CLIENT_SECRET,
-        'redirect_uri': REDIRECT_URL,
+        'redirect_uri': REDIRECT_URL.replace("[__HOST__]", host),
         'grant_type': 'authorization_code'
     }
 
