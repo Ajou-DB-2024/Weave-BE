@@ -46,3 +46,14 @@ def create_club(name: str, club_depart: str, club_type: str, president_id: int) 
     run_query(query.ADD_CLUB_MANAGER, (president_id, club_id))
 
     return {"id": club_id, "name": name}
+
+def update_club_detail(club_id: int, description: Optional[str] = None, study_count: Optional[int] = None, 
+                       award_count: Optional[int] = None, edu_count: Optional[int] = None,
+                       event_count: Optional[int] = None, established_date: Optional[str] = None, 
+                       location: Optional[str] = None) -> None:
+    # 수정된 값들을 튜플로 전달
+    values = (description, study_count, award_count, edu_count, event_count, established_date, location, club_id)
+    
+    result = run_query(query.UPDATE_CLUB_DETAIL, values)
+    if result:
+        raise ValueError("detail value error.")

@@ -21,3 +21,10 @@ ADD_CLUB_DETAIL = """
     INSERT INTO CLUB_DETAIL (club_id, description, study_count, award_count, edu_count, event_count, established_date, location)
     VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
     """
+
+UPDATE_CLUB_DETAIL = """
+    UPDATE CLUB_DETAIL
+    SET description = %s, study_count = %s, award_count = %s, edu_count = %s,
+        event_count = %s, established_date = %s, location = %s
+    WHERE club_id = %s
+    """
