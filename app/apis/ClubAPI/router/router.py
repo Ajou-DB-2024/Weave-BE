@@ -1,9 +1,17 @@
 from fastapi import APIRouter, Query, HTTPException
 from typing import List, Optional
-from app.apis.ClubAPI.service.club_service import find_clubs, create_new_club, update_club_information, get_club_brief
-from app.apis.ClubAPI.Models.clubmodel import ClubDetail, ClubBriefResponse
+from app.apis.ClubAPI.service.club_service import find_clubs, create_new_club, get_club_members, update_club_information, get_club_brief
+from app.apis.ClubAPI.Models.clubmodel import ClubDetail, ClubBriefResponse, MemberListResponse
 
 router = APIRouter()
+
+@router.get("/club/members", response_model=MemberListResponse)
+async def club_members(club_id: int = Query(...)):
+    if not club_id:
+        raise HTTPException(status_code=400, detail="club_id는 필수 입력입니다.")
+    
+    members = get_club_members(club_id)
+    return {"member_ids": members}
 
 @router.get("/club/brief", response_model=ClubBriefResponse)
 async def club_brief(club_id: int):

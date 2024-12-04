@@ -1,6 +1,12 @@
-from typing import Optional
+from typing import List, Optional
 from pydantic import BaseModel
 from dataclasses import dataclass
+
+class MemberListResponse(BaseModel):
+    member_ids: List[int]
+
+    class Config:
+        orm_mode = True
 
 @dataclass
 class ClubDetail(BaseModel):

@@ -64,3 +64,6 @@ def get_club_brief_summary(club_id: int) -> dict:
         raise ValueError("동아리가 없습니다.")
 
     return result[0]
+
+def get_members_by_club_id(club_id: int) -> list[dict]:
+    return run_query(query.GET_MEMBERID_BY_CLUBID, (club_id,))

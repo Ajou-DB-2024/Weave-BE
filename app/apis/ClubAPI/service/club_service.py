@@ -1,8 +1,9 @@
 from typing import List, Optional
-from app.apis.ClubAPI.repository.repository import find_club_by_name, find_clubs_by_tags, create_club, update_club_detail, get_club_brief_summary
+from fastapi import HTTPException
+from app.apis.ClubAPI.repository.repository import find_club_by_name, find_clubs_by_tags, create_club, get_members_by_club_id, update_club_detail, get_club_brief_summary
 from app.common.response.formatter import success_response, error_response
 
-def find_clubs(name: Optional[str] = None, club_id: Optional[int] = None, tag_ids: Optional[List[int]] = None):
+def find_clubs(name: Optional[str] = None, tag_ids: Optional[List[int]] = None):
     # 동아리 이름으로 검색
     if name:
         clubs = find_club_by_name(name)
@@ -39,3 +40,12 @@ def update_club_information(club_id: int, description: Optional[str], study_coun
 
 def get_club_brief(club_id: int) -> dict:
     return get_club_brief_summary(club_id)
+
+def get_club_members(club_id: int) -> list[int]:
+    try:
+        members = get_members_by_club_id(club_id)
+        if not members:
+            raise HTTPException(status_code=404, detail="해당 동아리에 회원이 없습니다.")
+        return [member["id"] for member in members]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

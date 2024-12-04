@@ -36,3 +36,10 @@ GET_CLUB_SUMMARY = """
          JOIN RECRUIT recruit ON submission.recruit_id = recruit.id
          WHERE recruit.club_id = %s AND submission.is_submitted = TRUE) AS total_submissions
     """
+
+GET_MEMBERID_BY_CLUBID = """
+    SELECT member.id
+    FROM MEMBER member
+    JOIN BELONGING belonging ON member.id = belonging.member_id
+    WHERE belonging.club_id = %s
+    """
