@@ -33,7 +33,7 @@ def update_club_information(club_id: int, description: Optional[str], study_coun
                              award_count: Optional[int], edu_count: Optional[int], 
                              event_count: Optional[int], established_date: Optional[str], 
                              location: Optional[str]) -> None:
-    #동아리 소개 정보를 수정하는 서비스 함수.
+    #동아리 정보를 수정하는 서비스 함수.
     
     update_club_detail(club_id, description, study_count, award_count, edu_count, event_count, established_date, location)
 

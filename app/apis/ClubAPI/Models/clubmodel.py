@@ -14,6 +14,10 @@ class ClubDetail(BaseModel):
     club_depart: str
     club_type: str
     president_id: int
+
+@dataclass
+class ClubDetailEdit(BaseModel):
+    club_id: int
     description: Optional[str] = None
     study_count: Optional[int] = None
     award_count: Optional[int] = None

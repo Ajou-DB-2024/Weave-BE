@@ -1,9 +1,12 @@
 CLUB_FINDBY_NAME = "SELECT id, name FROM CLUB WHERE name LIKE %s"
-CLUB_FINDBY_TAGS = """
+
+def CLUB_FINDBY_TAGS(tag_count: int) -> str:
+    placeholders = ', '.join(['%s'] * tag_count)
+    return f"""
     SELECT DISTINCT club.id, club.name
     FROM CLUB club
     JOIN TAGMAP tagmap ON club.id = tagmap.club_id
-    WHERE tagmap.tag_id IN (%s)
+    WHERE tagmap.tag_id IN ({placeholders})
     GROUP BY club.id
     HAVING COUNT(DISTINCT tagmap.tag_id) = %s
     """
@@ -38,8 +41,8 @@ GET_CLUB_SUMMARY = """
     """
 
 GET_MEMBERID_BY_CLUBID = """
-    SELECT member.id
-    FROM MEMBER member
-    JOIN BELONGING belonging ON member.id = belonging.member_id
-    WHERE belonging.club_id = %s
+    SELECT id
+    FROM MEMBER m
+    JOIN BELONGING b ON m.id = b.member_id
+    WHERE b.club_id = %s
     """

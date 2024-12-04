@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Query, HTTPException
 from typing import List, Optional
 from app.apis.ClubAPI.service.club_service import find_clubs, create_new_club, get_club_members, update_club_information, get_club_brief
-from app.apis.ClubAPI.Models.clubmodel import ClubDetail, ClubBriefResponse, MemberListResponse
+from app.apis.ClubAPI.Models.clubmodel import ClubDetail, ClubBriefResponse, ClubDetailEdit, MemberListResponse
 
 router = APIRouter()
 
@@ -22,7 +22,7 @@ async def club_brief(club_id: int):
         raise HTTPException(status_code=404, detail=str(e))
 
 @router.patch("/club/detailedit")
-async def update_club_detail(request: ClubDetail):
+async def update_club_detail(request: ClubDetailEdit):
     try:
         update_club_information(
             request.club_id,
@@ -55,7 +55,6 @@ async def create_club(request: ClubDetail): #동아리 추가
 @router.get("/club/find")
 def get_club(
     club_name: Optional[str] = None, 
-    club_id: Optional[int] = None, 
     tag_ids: Optional[List[int]] = Query([], alias="tag_id")  # 여러 개의 태그 ID
 ):  
-    return find_clubs(name=club_name, club_id=club_id, tag_ids=tag_ids)
+    return find_clubs(name=club_name, tag_ids=tag_ids)
