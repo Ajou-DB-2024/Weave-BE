@@ -19,6 +19,8 @@ app = FastAPI(
 # 라우터 등록
 app.include_router(TestRouter.router, prefix="/api/v0", tags=["Test"])
 app.include_router(MemberRouter.router, prefix="/api/v0", tags=["Member"])
+app.include_router(FormRouter.router, prefix="/api/v0", tags=["Form"])
+app.include_router(ApplyRouter.router, prefix="/api/v0", tags=["Apply"])
 
 # dev/newbiehwang FormAPI router 추가
 app.include_router(FormRouter.router, prefix="/api/v0", tags=["Form"])
@@ -35,7 +37,7 @@ async def middleware_wrapper(request, call_next):
 if __name__ == "__main__":
     uvicorn.run(
         "app.main:app",  # "파일명:FastAPI 인스턴스"
-        host=settings.HOST,  # 호스트 주소 (로컬호스트)
+        host="0.0.0.0",  # 호스트 주소 (로컬호스트)
         port=settings.PORT,        # 포트 번호
         reload=settings.PY_ENV == "development" # 코드 변경 시 자동 재시작 (개발용 옵션)
     )

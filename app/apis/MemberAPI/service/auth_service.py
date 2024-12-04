@@ -1,3 +1,4 @@
+import traceback
 from typing import Dict
 from fastapi import Depends, HTTPException, Request
 from fastapi.security import OAuth2PasswordBearer
@@ -23,10 +24,7 @@ API_SCOPES = [
   "https://www.googleapis.com/auth/directory.readonly"
 ]
 
-REDIRECT_URL = "http://%s:%s/api/v0/login/redirect"%(
-  settings.HOST,
-  settings.PORT
-)
+REDIRECT_URL = settings.GOOGLE_REDIRECT_URL
 
 AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth?scope=%s&access_type=offline&login_hint=%s&response_type=code&redirect_uri=%s&client_id=%s&prompt=consent" % (
     " ".join(API_SCOPES),
@@ -48,6 +46,10 @@ class GCPService:
       raise HTTPException(status_code=400, detail="Code not found")
     
     # 토큰 요청을 위한 데이터
+    host = request.client.host
+    if host == "127.0.0.1":
+      host = "localhost"
+    
     token_data = {
         'code': code,
         'client_id': settings.GOOGLE_CLIENT_ID,
@@ -159,6 +161,7 @@ class WeaveAuthService:
     
     except Exception as e:
       print(e)
+      traceback.print_exc()
       return {"result": False}
 
   def create_token(member: Member.Member) -> str:
