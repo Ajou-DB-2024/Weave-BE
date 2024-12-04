@@ -28,3 +28,6 @@ class SubmissionSave(BaseModel):
     form_id: int
     title: str
     answers: List[Answer]
+
+class MemberRequest(BaseModel):
+    member_id: int

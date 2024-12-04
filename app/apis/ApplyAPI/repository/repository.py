@@ -1,5 +1,5 @@
 from app.db import run_query
-from app.apis.ApplyAPI.repository.query import SEARCH_RECRUIT, INSERT_SUBMISSION, INSERT_ANSWER, GET_SUBMISSION_ID, GET_SUBMISSION_BY_ID
+from app.apis.ApplyAPI.repository.query import SEARCH_RECRUIT, INSERT_SUBMISSION, INSERT_ANSWER, GET_SUBMISSION_ID, SELECT_QUESTION_ANSWERS, SELECT_SUBMISSION_LIST
 
 class ApplyRepository:
     @staticmethod
@@ -38,9 +38,17 @@ class ApplyRepository:
         run_query(INSERT_ANSWER, (submission_id, question_id, value))
     
     @staticmethod
-    def get_submission_by_id(submission_id: int) -> dict:
+    def get_question_answers(submission_id: int):
         try:
-            result = run_query(GET_SUBMISSION_BY_ID, (submission_id,))
-            return result[0] if result else None
+            result = run_query(SELECT_QUESTION_ANSWERS, (submission_id,))
+            return result
+        except Exception as e:
+            raise Exception(f"Database error: {e}")
+        
+    @staticmethod
+    def get_submission_list(member_id: int):
+        try:
+            result = run_query(SELECT_SUBMISSION_LIST, (member_id,))
+            return result
         except Exception as e:
             raise Exception(f"Database error: {e}")

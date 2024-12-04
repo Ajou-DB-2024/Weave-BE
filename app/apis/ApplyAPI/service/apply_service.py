@@ -43,8 +43,20 @@ class ApplyService:
         return {"submission_id": submission_id}
     
     @staticmethod
-    def get_submission(submission_id: int) -> dict:
-        submission = ApplyRepository.get_submission_by_id(submission_id)
-        if not submission:
-            raise Exception(f"No submission found with ID {submission_id}")
-        return submission
+    def get_question_answers(submission_id: int):
+        data = ApplyRepository.get_question_answers(submission_id)
+        if not data:
+            raise Exception("No answers found for the given submission")
+        return data
+    
+    @staticmethod
+    def get_submission_list(data: dict):
+        member_id = data.get("member_id")
+        if not member_id:
+            raise Exception("member_id is required")
+        
+        submission_list = ApplyRepository.get_submission_list(member_id)
+        if not submission_list:
+            raise Exception("No submissions found for the given member_id")
+        
+        return submission_list

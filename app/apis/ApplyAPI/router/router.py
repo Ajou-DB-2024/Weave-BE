@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from app.apis.ApplyAPI.service.apply_service import ApplyService
-from app.apis.ApplyAPI.model.model import RecruitSearchRequest, SubmissionSave
+from app.apis.ApplyAPI.model.model import RecruitSearchRequest, SubmissionSave, MemberRequest
 from app.common.response.formatter import success_response, error_response
 
 router = APIRouter()
@@ -44,12 +44,23 @@ async def save_submission(data: SubmissionSave):
         return error_response(error="DATABASE_ERROR", message=str(e))
     
 @router.get("/apply/submission/{submission_id}")
-async def get_submission(submission_id: int):
+async def get_submission_answers(submission_id: int):
     """
-    특정 submission_id에 해당하는 지원서를 조회합니다.
+    특정 submission_id에 해당하는 질문과 답변을 조회합니다.
     """
     try:
-        submission = ApplyService.get_submission(submission_id)
-        return success_response(data=submission)
+        answers_data = ApplyService.get_question_answers(submission_id)
+        return success_response(data=answers_data)
     except Exception as e:
-        return error_response(error="SUBMISSION_NOT_FOUND", message=str(e))
+        return error_response(error="DATABASE_ERROR", message=str(e))
+    
+@router.post("/apply/submission/list")
+async def get_submission_list(data: MemberRequest):
+    """
+    특정 member_id에 해당하는 지원서 목록을 조회합니다.
+    """
+    try:
+        submission_list = ApplyService.get_submission_list(data.dict())
+        return success_response(data=submission_list)
+    except Exception as e:
+        return error_response(error="DATABASE_ERROR", message=str(e))
