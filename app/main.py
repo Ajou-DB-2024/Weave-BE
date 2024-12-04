@@ -31,7 +31,7 @@ async def middleware_wrapper(request, call_next):
 if __name__ == "__main__":
     uvicorn.run(
         "app.main:app",  # "파일명:FastAPI 인스턴스"
-        host="localhost",  # 호스트 주소 (로컬호스트)
+        host="0.0.0.0",  # 호스트 주소 (로컬호스트)
         port=settings.PORT,        # 포트 번호
         reload=settings.PY_ENV == "development" # 코드 변경 시 자동 재시작 (개발용 옵션)
     )
