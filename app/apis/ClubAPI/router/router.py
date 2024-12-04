@@ -13,7 +13,7 @@ async def club_brief(club_id: int):
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
-@router.patch("/club/detail")
+@router.patch("/club/detailedit")
 async def update_club_detail(request: ClubDetail):
     try:
         update_club_information(
