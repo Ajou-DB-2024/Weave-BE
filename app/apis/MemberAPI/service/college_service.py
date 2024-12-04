@@ -15,17 +15,17 @@ class AjouService:
     try:
       search_major = major.replace("전공", "")
       
-      if search_major in DEPART_MAP:
-        univ_info = DEPART_MAP[search_major]
-        return {
-          "college": univ_info['college'],
-          "department": univ_info['department'],
-          "major": major
-        }
-      else:
-        return None
-    
-    except json.JSONDecodeError:
+      if search_major not in DEPART_MAP:
+        raise Exception
+      
+      univ_info = DEPART_MAP[search_major]
+      return {
+        "college": univ_info['college'],
+        "department": univ_info['department'],
+        "major": major
+      }
+
+    except Exception:
       return None
 
   def get_univ_course(job: str):
