@@ -1,7 +1,9 @@
 from typing import List, Optional
-from fastapi import HTTPException
+from fastapi import HTTPException, Depends
 from app.apis.ClubAPI.repository.repository import find_club_by_name, find_clubs_by_tags, create_club, get_members_by_club_id, update_club_detail, get_club_brief_summary
 from app.common.response.formatter import success_response, error_response
+from app.apis.MemberAPI.service.auth_service import WeaveAuthService
+from app.apis.MemberAPI.model import Member
 
 def find_clubs(name: Optional[str] = None, tag_ids: Optional[List[int]] = None):
     # 동아리 이름으로 검색
@@ -32,9 +34,8 @@ def create_new_club(name: str, club_depart: str, club_type: str, president_id: i
 def update_club_information(club_id: int, description: Optional[str], study_count: Optional[int], 
                              award_count: Optional[int], edu_count: Optional[int], 
                              event_count: Optional[int], established_date: Optional[str], 
-                             location: Optional[str]) -> None:
+                             location: Optional[str], logined_user: Member.Member = Depends(WeaveAuthService.digest_token)) -> None:
     #동아리 정보를 수정하는 서비스 함수.
-    
     update_club_detail(club_id, description, study_count, award_count, edu_count, event_count, established_date, location)
 
 
