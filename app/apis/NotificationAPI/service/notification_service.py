@@ -59,11 +59,9 @@ class NotificationService:
         """
         결과 발표 알림을 생성합니다.
         """
-        print(f"[DEBUG] Starting result notification creation for recruit_id: {recruit_id}")
-
+        
         # 1. recruit_id로 회원 ID 목록 조회
         member_ids = NotificationRepository.get_member_ids_by_recruit_id(recruit_id)
-        print(f"[DEBUG] Member IDs: {member_ids}")
 
         if not member_ids:
             raise ValueError(f"No members found for recruit_id: {recruit_id}")
@@ -75,11 +73,9 @@ class NotificationService:
         notification_id = NotificationRepository.create_notification(
             notification_type, notification_title, notification_content
         )
-        print(f"[DEBUG] Notification ID created: {notification_id}")
 
         # 3. 회원과 알림 매핑 생성
         for member in member_ids:
-            print(f"[DEBUG] Mapping notification {notification_id} to member {member['member_id']}")
             NotificationRepository.map_notification_to_member(member["member_id"], notification_id)
 
     @staticmethod
@@ -89,7 +85,6 @@ class NotificationService:
         """
         # 1. 알림 생성
         notification_id = NotificationRepository.create_notification(notification_type, title, content)
-        print(f"Notification ID created: {notification_id}")
 
         # 2. 모든 회원 ID 조회
         member_ids = NotificationRepository.get_all_member_ids()
@@ -99,7 +94,6 @@ class NotificationService:
         # 3. 회원과 알림 매핑 생성
         for member in member_ids:
             NotificationRepository.map_notification_to_member(member["member_id"], notification_id)
-        print(f"Notification mapped to all members successfully.")
 
     @staticmethod
     def create_closing_reminder_notifications():
@@ -109,7 +103,6 @@ class NotificationService:
         # 1. end_date 하루 전인 리크루팅 조회
         recruits = NotificationRepository.get_recruits_with_one_day_left()
         if not recruits:
-            print("No recruits found with end_date one day away.")
             return
 
         for recruit in recruits:
@@ -120,7 +113,6 @@ class NotificationService:
             member_ids = NotificationRepository.get_member_ids_by_recruit_id_all_submission(recruit_id)
 
             if not member_ids:
-                print(f"No members found for recruit_id: {recruit_id}")
                 continue
 
             # 3. 알림 생성

@@ -46,7 +46,3 @@ if __name__ == "__main__":
         reload=settings.PY_ENV == "development" # 코드 변경 시 자동 재시작 (개발용 옵션)
     )
 
-# 디버깅용 라우터 출력
-print("Registered Routes:")
-for route in app.routes:
-    print(route.path, route.name)
