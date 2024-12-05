@@ -21,7 +21,6 @@ def check_club_exists(name: str) -> bool:
 
 def create_club(name: str, club_depart: str, club_type: str, president_id: int) -> dict:
     #동아리 추가
-
     run_query(query.ADD_CLUB, (name, club_depart, club_type))
     
     # 동아리 id를 반환

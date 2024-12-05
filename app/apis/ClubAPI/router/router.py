@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, File, Query, UploadFile
 from typing import List, Optional
 
 from fastapi.responses import FileResponse
-from app.apis.ClubAPI.service.club_service import delete_club_file, download_club_file, find_clubs, create_new_club, get_club_members, save_file, update_club_information, get_club_brief, upload_club_file
+from app.apis.ClubAPI.service.club_service import delete_club_file, download_club_file, find_clubs, create_new_club, get_club_members, update_club_information, get_club_brief, upload_clubdetail_file
 from app.apis.ClubAPI.Models.clubmodel import ClubDetail, ClubBriefResponse, ClubDetailEdit, MemberListResponse
 from app.apis.MemberAPI.model import Member
 from app.apis.MemberAPI.service.auth_service import WeaveAuthService
@@ -14,7 +14,6 @@ router = APIRouter()
 async def club_members(club_id: int = Query(...), logined_user: Member = Depends(WeaveAuthService.digest_token)):
     if not club_id:
         return error_response(error="INVALID_INPUT", message="club_id는 필수 입력입니다.")
-    
     try:
         members = get_club_members(logined_user.id, club_id)
         return success_response(data={"member_ids": members}, message="Club members retrieved successfully")
@@ -58,7 +57,7 @@ async def update_club_detail(request: ClubDetailEdit, logined_user: Member = Dep
 async def upload_file(club_id: int, file: UploadFile = File(...), logined_user: Member = Depends(WeaveAuthService.digest_token)):
     try:
         # 서비스 계층으로 파일 업로드 요청 전달
-        result = await upload_club_file(file, logined_user.id, club_id)
+        result = await upload_clubdetail_file(file, logined_user.id, club_id)
         return success_response(data=result, message="파일이 성공적으로 업로드되었습니다.")
     
     except Exception as e:
@@ -95,9 +94,10 @@ async def create_club(request: ClubDetail):  # 동아리 추가
             club_type=request.club_type,
             president_id=request.president_id
         )
-        if result.get("success"):
-            return  success_response(data=result, message="Club created successfully")
-        return error_response(error="INVALID_INPUT", message=result.get("message"))
+        if result:
+            return success_response(data=result, message="Club created successfully")
+        else:
+            return error_response(error="INVALID_INPUT", message=result.get("message"))
     except Exception as e:
         return error_response(error="SERVER_ERROR", message=str(e))
 
@@ -108,8 +108,9 @@ def get_club(
 ):  
     try:
         result = find_clubs(name=club_name, tag_ids=tag_ids)
-        if not result.get("success"):
-            return error_response(error="NOT_FOUND", message=result.get("message"))
+        if 'success' not in result or not result['success']:
+            return error_response(error="NOT_FOUND", message=result.get("message", "No message available"))
+
         return success_response(data=result.get("data"), message=result.get("message"))
     
     except Exception as e:
