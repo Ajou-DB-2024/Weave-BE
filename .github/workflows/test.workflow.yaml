@@ -63,4 +63,5 @@ jobs:
           port: ${{ secrets.SERVER_SSH_PORT }}
           script: |
             docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/weave-be:latest
-            /docker/restart.bot.sh
+            cd /docker
+            ./restart.bot.sh
