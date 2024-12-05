@@ -6,6 +6,7 @@ from app.middlewares.log import log_requests
 
 from app.apis.TestAPI.router import router as TestRouter
 from app.apis.FormAPI.router import router as FormRouter
+from app.apis.NotificationAPI.router import router as NotificationRouter
 
 # FastAPI 앱 생성
 app = FastAPI(
@@ -19,6 +20,9 @@ app.include_router(TestRouter.router, prefix="/api/v0", tags=["Test"])
 
 # dev/newbiehwang FormAPI router 추가
 app.include_router(FormRouter.router, prefix="/api/v0", tags=["Form"])
+
+# dev/dah NotificationAPI router 추가
+app.include_router(NotificationRouter.router, prefix="/api/v0", tags=["Notification"])
 
 # 미들웨어나 이벤트 핸들러 추가 가능
 @app.middleware("http")
