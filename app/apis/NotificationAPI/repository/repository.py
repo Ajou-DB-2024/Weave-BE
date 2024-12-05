@@ -7,12 +7,9 @@ from app.apis.NotificationAPI.repository.query import (
     GET_MEMBER_IDS_BY_RECRUIT_ID,
     INSERT_NOTIFICATION,
     INSERT_NOTIFICATION_MAP,
-    GET_ALL_MEMBER_IDS
-    # GET_RECRUIT_NAME,
-    # GET_ALL_MEMBER_IDS,
-    # INSERT_NOTIFICATION,
-    # INSERT_NOTIFICATION_MAP,
-    # GET_MEMBER_IDS_BY_RECRUIT_ID_AND_END_DATE
+    GET_ALL_MEMBER_IDS,
+    GET_RECRUITS_WITH_ONE_DAY_LEFT,
+    GET_MEMBER_IDS_BY_RECRUIT_ID_ALL_SUBMISSION,
 )
 
 class NotificationRepository:
@@ -62,17 +59,43 @@ class NotificationRepository:
         print(f"[DEBUG] Last inserted notification ID: {result}")
         return result[0]["id"] if result else None
 
+    # @staticmethod
+    # def map_notification_to_member(member_id: int, notification_id: int) -> list:
+    #     """
+    #     회원과 알림 간의 매핑을 생성합니다.
+    #     """
+    #     print(f"[DEBUG] Mapping notification_id: {notification_id} to member_id: {member_id}")
+    #     result = run_query(INSERT_NOTIFICATION_MAP, (member_id, notification_id))
+    #     print(f"[DEBUG] Mapping result: {result}")
+    #     return result
+    
     @staticmethod
-    def map_notification_to_member(member_id: int, notification_id: int) -> list:
+    def map_notification_to_member(member_id: int, notification_id: int) -> dict:
         """
-        회원과 알림 간의 매핑을 생성합니다.
+        회원과 알림 간의 매핑을 생성하거나, 중복이 있는 경우 이를 무시하고 성공으로 간주합니다.
         """
-        print(f"[DEBUG] Mapping notification_id: {notification_id} to member_id: {member_id}")
-        result = run_query(INSERT_NOTIFICATION_MAP, (member_id, notification_id))
-        print(f"[DEBUG] Mapping result: {result}")
-        return result
-    
-    
+        try:
+            print(f"[DEBUG] Attempting to map notification_id: {notification_id} to member_id: {member_id}")
+
+            # 중복 여부 확인
+            existing = run_query(
+                "SELECT COUNT(*) AS cnt FROM notification_map WHERE member_id = %s AND notification_id = %s",
+                (member_id, notification_id)
+            )
+            if existing[0]["cnt"] > 0:
+                print(f"[INFO] Mapping already exists for member_id: {member_id} and notification_id: {notification_id}")
+                return {"status": "success", "message": "Mapping already exists"}
+
+            # 매핑 생성
+            result = run_query(INSERT_NOTIFICATION_MAP, (member_id, notification_id))
+            print(f"[SUCCESS] Notification mapped successfully: {result}")
+            return {"status": "success", "message": "Mapping created successfully"}
+
+        except Exception as e:
+            print(f"[ERROR] Failed to map member_id: {member_id} to notification_id: {notification_id}. Error: {e}")
+            return {"status": "error", "message": str(e)}
+
+
     @staticmethod
     def get_all_member_ids() -> list:
         """
@@ -83,57 +106,26 @@ class NotificationRepository:
         print(f"Member IDs fetched: {result}")
         return result
 
+    @staticmethod
+    def get_recruits_with_one_day_left() -> list:
+        """
+        end_date 하루 전인 리크루팅을 조회합니다.
+        """
+        print("Fetching recruits with end_date one day away.")
+        result = run_query(GET_RECRUITS_WITH_ONE_DAY_LEFT)
+        print(f"Recruits with one day left: {result}")
+        return result
+
+    @staticmethod
+    def get_member_ids_by_recruit_id_all_submission(recruit_id: int) -> list:
+        """
+        특정 리크루팅에 지원한 회원 ID를 조회합니다.
+        """
+        print(f"Fetching member IDs for recruit_id: {recruit_id}")
+        result = run_query(GET_MEMBER_IDS_BY_RECRUIT_ID_ALL_SUBMISSION, (recruit_id,))
+        print(f"Member IDs fetched: {result}")
+        return result
 
     
-   
 
-    # @staticmethod
-    # def create_closing_reminder_notifications(recruit_id: int):
-    #     """
-    #     지원 마감 알림을 생성합니다.
-    #     """
-    #     # 1. 리크루팅 이름 가져오기
-    #     recruit_name = NotificationRepository.get_recruit_name(recruit_id)
-    #     if not recruit_name:
-    #         raise ValueError("Recruit not found for the given recruit_id.")
 
-    #     # 2. end_date가 하루 전인 지원한 회원들의 ID 가져오기
-    #     member_ids = NotificationRepository.get_member_ids_by_recruit_id_and_end_date(recruit_id)
-    #     if not member_ids:
-    #         raise ValueError("No members found with recruit_id and end_date condition.")
-
-    #     # 3. 알림 생성
-    #     for member_id in member_ids:
-    #         title = f"리크루팅 {recruit_name} 지원 마감 임박"
-    #         content = f"리크루팅 '{recruit_name}'의 지원 마감이 하루 남았습니다."
-    #         NotificationRepository.insert_notification("지원 마감", title, content)
-    #         NotificationRepository.insert_notification_map(member_id)
-
-    # @staticmethod
-    # def get_member_ids_by_recruit_id_and_end_date(recruit_id: int) -> list:
-    #     """
-    #     특정 recruit_id와 end_date가 하루 전인 회원들의 ID를 반환합니다.
-    #     """
-    #     return [row[0] for row in run_query(GET_MEMBER_IDS_BY_RECRUIT_ID_AND_END_DATE, (recruit_id,))]
-
-    # @staticmethod
-    # def get_recruit_name(recruit_id: int) -> str:
-    #     """
-    #     특정 recruit_id의 리크루팅 이름을 반환합니다.
-    #     """
-    #     result = run_query(GET_RECRUIT_NAME, (recruit_id,))
-    #     return result[0][0] if result else None
-
-    # @staticmethod
-    # def insert_notification(notification_type: str, title: str, content: str):
-    #     """
-    #     알림 데이터를 삽입합니다.
-    #     """
-    #     run_query(INSERT_NOTIFICATION, (notification_type, title, content))
-
-    # @staticmethod
-    # def insert_notification_map(member_id: int):
-    #     """
-    #     Notification Map에 데이터를 삽입합니다.
-    #     """
-    #     run_query(INSERT_NOTIFICATION_MAP, (member_id,))

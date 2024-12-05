@@ -101,24 +101,36 @@ class NotificationService:
             NotificationRepository.map_notification_to_member(member["member_id"], notification_id)
         print(f"Notification mapped to all members successfully.")
 
-    # @staticmethod
-    # def create_closing_reminder_notifications(recruit_id: int):
-    #     """
-    #     지원 마감 알림을 생성합니다.
-    #     """
-    #     # 1. 리크루팅 이름 가져오기
-    #     recruit_name = NotificationRepository.get_recruit_name(recruit_id)
-    #     if not recruit_name:
-    #         raise ValueError("Recruit not found for the given recruit_id.")
+    @staticmethod
+    def create_closing_reminder_notifications():
+        """
+        지원 마감 하루 전인 리크루팅에 대해 알림을 생성합니다.
+        """
+        # 1. end_date 하루 전인 리크루팅 조회
+        recruits = NotificationRepository.get_recruits_with_one_day_left()
+        if not recruits:
+            print("No recruits found with end_date one day away.")
+            return
 
-    #     # 2. end_date가 하루 전인 지원한 회원들의 ID 가져오기
-    #     member_ids = NotificationRepository.get_member_ids_by_recruit_id_and_end_date(recruit_id)
-    #     if not member_ids:
-    #         raise ValueError("No members found with recruit_id and end_date condition.")
+        for recruit in recruits:
+            recruit_id = recruit["id"]
+            recruit_name = recruit["name"]
 
-    #     # 3. 알림 생성
-    #     for member_id in member_ids:
-    #         title = f"리크루팅 {recruit_name} 지원 마감 임박"
-    #         content = f"리크루팅 '{recruit_name}'의 지원 마감이 하루 남았습니다."
-    #         NotificationRepository.insert_notification("지원 마감", title, content)
-    #         NotificationRepository.insert_notification_map(member_id)
+            # 2. 해당 리크루팅에 지원한 회원 ID 조회
+            member_ids = NotificationRepository.get_member_ids_by_recruit_id_all_submission(recruit_id)
+
+            if not member_ids:
+                print(f"No members found for recruit_id: {recruit_id}")
+                continue
+
+            # 3. 알림 생성
+            notification_type = "지원 마감"
+            notification_title = "지원 마감 알림"
+            notification_content = f"리크루팅 '{recruit_name}'의 지원 마감이 하루 남았습니다."
+            notification_id = NotificationRepository.create_notification(
+                notification_type, notification_title, notification_content
+            )
+
+            # 4. 회원-알림 매핑 생성
+            for member in member_ids:
+                NotificationRepository.map_notification_to_member(member["member_id"], notification_id)

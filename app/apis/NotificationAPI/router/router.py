@@ -63,7 +63,7 @@ async def create_result_announcement_notifications(recruit_id: int):
         print(f"[ERROR] Internal Server Error: {e}")
         return error_response(error="INTERNAL_SERVER_ERROR", message=str(e))
     
-
+"""curl 명령어로 post 호출 필요"""
 @router.post("/notifications/announcement/")
 async def create_announcement_notification(notification_type: str, title: str, content: str):
     """
@@ -83,37 +83,17 @@ async def create_announcement_notification(notification_type: str, title: str, c
         return error_response(error="INTERNAL_SERVER_ERROR", message=str(e))
 
 
-# @router.post("/notifications/announcement/")
-# async def create_announcement_notifications(notification_content: str):
-#     """
-#     시스템 운영자가 공지사항을 입력하면 모든 회원에게 알림을 생성합니다.
-#     """
-#     try:
-#         print(f"Creating announcement notifications with content: {notification_content}")  # 디버깅용 로그
-#         NotificationService.create_announcement_notifications(notification_content)
-#         print(f"Announcement notifications created successfully")  # 디버깅용 로그
-#         return success_response(message="공지사항 알림이 성공적으로 생성되었습니다.")
-#     except ValueError as ve:
-#         print(f"Validation Error: {ve}")  # 디버깅용 로그
-#         return error_response(error="VALIDATION_ERROR", message=str(ve))
-#     except Exception as e:
-#         print(f"Unhandled Error in create_announcement_notifications: {e}")  # 디버깅용 로그
-#         return error_response(error="INTERNAL_SERVER_ERROR", message=str(e))
 
-
-# @router.post("/notifications/closing-reminder/{recruit_id}")
-# async def create_closing_reminder_notifications(recruit_id: int):
-#     """
-#     특정 리크루팅의 지원 마감 알림을 생성합니다.
-#     """
-#     try:
-#         print(f"Creating closing reminder notifications for recruit_id: {recruit_id}")  # 디버깅용 로그
-#         NotificationService.create_closing_reminder_notifications(recruit_id)
-#         print(f"Closing reminder notifications created successfully for recruit_id: {recruit_id}")  # 디버깅용 로그
-#         return success_response(message="지원 마감 알림이 성공적으로 생성되었습니다.")
-#     except ValueError as ve:
-#         print(f"Validation Error: {ve}")  # 디버깅용 로그
-#         return error_response(error="VALIDATION_ERROR", message=str(ve))
-#     except Exception as e:
-#         print(f"Unhandled Error in create_closing_reminder_notifications: {e}")  # 디버깅용 로그
-#         return error_response(error="INTERNAL_SERVER_ERROR", message=str(e))
+"""방법1: scheduler 설정하면 하루에 한 번 실행 가능 -> main.py 수정 필요. 그렇지 않으면 직접 호출해야 함. """
+"""방법2: curl 명령어로 post 호출"""
+@router.post("/notifications/closing-reminder/")
+async def create_closing_reminder_notifications():
+    """
+    end_date 하루 전인 리크루팅에 대한 지원 마감 알림을 생성합니다.
+    """
+    try:
+        NotificationService.create_closing_reminder_notifications()
+        return success_response(message="지원 마감 알림이 성공적으로 생성되었습니다.")
+    except Exception as e:
+        print(f"Error occurred during closing reminder notification creation: {e}")
+        return error_response(error="INTERNAL_SERVER_ERROR", message=str(e))

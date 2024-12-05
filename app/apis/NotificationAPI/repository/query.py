@@ -48,16 +48,19 @@ GET_ALL_MEMBER_IDS = """
 SELECT id AS member_id FROM member;
 """
 
-# # end_date 하루 전인 리크루팅의 회원 ID 조회
-# GET_MEMBER_IDS_BY_RECRUIT_ID_AND_END_DATE = """
-# SELECT s.member_id
-# FROM submission s
-# JOIN recruit r ON s.recruit_id = r.id
-# WHERE s.recruit_id = %s
-#   AND s.is_submitted = TRUE
-#   AND DATE(r.end_date) = DATE_SUB(CURDATE(), INTERVAL -1 DAY);
-# """
+# end_date 하루 전인 리크루팅 ID 조회
+GET_RECRUITS_WITH_ONE_DAY_LEFT = """
+SELECT id, name
+FROM recruit
+WHERE DATE(end_date) = DATE(NOW() + INTERVAL 1 DAY);
+"""
 
+# 특정 리크루팅에 지원한 회원 ID 조회
+GET_MEMBER_IDS_BY_RECRUIT_ID_ALL_SUBMISSION = """
+SELECT s.member_id
+FROM submission s
+WHERE s.recruit_id = %s;
+"""
 
 
 
