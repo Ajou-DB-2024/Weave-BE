@@ -12,6 +12,7 @@ from app.apis.NotificationAPI.router import router as NotificationRouter
 from app.apis.MemberAPI.router import router as MemberRouter
 from app.apis.FormAPI.router import router as FormRouter
 from app.apis.ApplyAPI.router import router as ApplyRouter
+from app.apis.ClubAPI.router import router as ClubRouter
 
 
 # FastAPI 앱 생성
@@ -37,6 +38,7 @@ app.include_router(TestRouter.router, prefix="/api/v0", tags=["Test"])
 app.include_router(MemberRouter.router, prefix="/api/v0", tags=["Member"])
 app.include_router(FormRouter.router, prefix="/api/v0", tags=["Form"])
 app.include_router(ApplyRouter.router, prefix="/api/v0", tags=["Apply"])
+app.include_router(ClubRouter.router, prefix="/api/v0", tags=["Club"])
 
 
 # dev/dah NotificationAPI router 추가
