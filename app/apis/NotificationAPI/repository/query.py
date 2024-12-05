@@ -27,29 +27,21 @@ WHERE nm.member_id = %s AND n.notification_type = '공지사항';
 """
 
 # # 결과 알림 생성
-# # 이거 연동 필요
-# GET_MEMBER_IDS_BY_RECRUIT_ID = """
-# SELECT member_id
-# FROM submission
-# WHERE recruit_id = %s AND is_announced = TRUE;
-# """
-# # 연동 필요
-# GET_RECRUIT_NAME = """
-# SELECT name
-# FROM recruit
-# WHERE id = %s;
-# """
+GET_MEMBER_IDS_BY_RECRUIT_ID = """
+SELECT s.member_id
+FROM submission s
+WHERE s.recruit_id = %s AND s.is_submitted = TRUE;
+"""
 
-# INSERT_NOTIFICATION = """
-# INSERT INTO notification (notification_type, title, content)
-# VALUES (%s, %s, %s);
-# """
+INSERT_NOTIFICATION = """
+INSERT INTO notification (notification_type, title, content)
+VALUES (%s, %s, %s);
+"""
 
-# INSERT_NOTIFICATION_MAP = """
-# INSERT INTO notification_map (member_id, notification_id)
-# VALUES (%s, LAST_INSERT_ID());
-# """
-
+INSERT_NOTIFICATION_MAP = """
+INSERT INTO notification_map (member_id, notification_id)
+VALUES (%s, %s);
+"""
 
 # # 공지사항 알림 생성
 # GET_ALL_MEMBER_IDS = """

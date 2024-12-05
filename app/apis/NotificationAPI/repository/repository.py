@@ -4,9 +4,9 @@ from app.apis.NotificationAPI.repository.query import (
     GET_NOTIFICATIONS_BY_MEMBER_ID,
     GET_RESULT_ANNOUNCEMENT_COUNT,
     GET_SERVICE_ANNOUNCEMENT_COUNT,
-    # GET_MEMBER_IDS_BY_RECRUIT_ID,
-    # INSERT_NOTIFICATION,
-    # INSERT_NOTIFICATION_MAP,
+    GET_MEMBER_IDS_BY_RECRUIT_ID,
+    INSERT_NOTIFICATION,
+    INSERT_NOTIFICATION_MAP,
     # GET_RECRUIT_NAME,
     # GET_ALL_MEMBER_IDS,
     # INSERT_NOTIFICATION,
@@ -39,37 +39,39 @@ class NotificationRepository:
         result = run_query(GET_SERVICE_ANNOUNCEMENT_COUNT, (member_id,))
         return result
 
+    @staticmethod
+    def get_member_ids_by_recruit_id(recruit_id: int):
+        """
+        주어진 recruit_id에 지원한 회원 ID를 조회합니다.
+        """
+        print(f"[DEBUG] Fetching member IDs for recruit_id: {recruit_id}")
+        result = run_query(GET_MEMBER_IDS_BY_RECRUIT_ID, (recruit_id,))
+        print(f"[DEBUG] Member IDs fetched: {result}")  # 결과 확인
+        return result
 
-    # @staticmethod
-    # def get_member_ids_by_recruit_id(recrWuit_id: int) -> list:
-    #     """
-    #     특정 recruit_id에 지원한 회원들의 ID를 반환합니다.
-    #     """
-    #     return [row[0] for row in run_query(GET_MEMBER_IDS_BY_RECRUIT_ID, (recruit_id,))]
+    @staticmethod
+    def create_notification(notification_type: str, title: str, content: str):
+        """
+        알림을 생성하고 생성된 알림 ID를 반환합니다.
+        """
+        print(f"[DEBUG] Creating notification with type: {notification_type}, title: {title}, content: {content}")
+        run_query(INSERT_NOTIFICATION, (notification_type, title, content))
+        print("[DEBUG] Notification inserted. Fetching last inserted ID.")
+        result = run_query("SELECT MAX(id) AS id FROM notification;")  # 마지막 삽입된 ID 확인
+        print(f"[DEBUG] Last inserted notification ID: {result}")
+        return result[0]["id"] if result else None
 
-    # @staticmethod
-    # def get_recruit_name(recruit_id: int) -> str:
-    #     """
-    #     특정 recruit_id의 리크루팅 이름을 반환합니다.
-    #     """
-    #     result = run_query(GET_RECRUIT_NAME, (recruit_id,))
-    #     return result[0][0] if result else None
-
-    # @staticmethod
-    # def insert_notification(notification_type: str, title: str, content: str):
-    #     """
-    #     알림 데이터를 삽입합니다.
-    #     """
-    #     run_query(INSERT_NOTIFICATION, (notification_type, title, content))
-
-    # @staticmethod
-    # def insert_notification_map(member_id: int):
-    #     """
-    #     Notification Map에 데이터를 삽입합니다.
-    #     """
-    #     run_query(INSERT_NOTIFICATION_MAP, (member_id,))
-
-    # @staticmethod
+    @staticmethod
+    def map_notification_to_member(member_id: int, notification_id: int) -> list:
+        """
+        회원과 알림 간의 매핑을 생성합니다.
+        """
+        print(f"[DEBUG] Mapping notification_id: {notification_id} to member_id: {member_id}")
+        result = run_query(INSERT_NOTIFICATION_MAP, (member_id, notification_id))
+        print(f"[DEBUG] Mapping result: {result}")
+        return result
+    
+   # @staticmethod
     # def get_all_member_ids() -> list:
     #     """
     #     모든 회원 ID를 반환합니다.

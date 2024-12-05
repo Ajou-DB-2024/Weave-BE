@@ -47,7 +47,22 @@ async def get_notifications(member_id: int):
     except Exception as e:
         return error_response(error="INTERNAL_SERVER_ERROR", message=str(e))
 
-
+@router.post("/notifications/result-announcement/{recruit_id}")
+async def create_result_announcement_notifications(recruit_id: int):
+    """
+    결과 발표 시 관련 회원들에게 알림을 생성합니다.
+    """
+    try:
+        print(f"[DEBUG] Received request to create notifications for recruit_id: {recruit_id}")
+        NotificationService.create_result_notifications(recruit_id)
+        return success_response(message="결과 발표 알림이 성공적으로 생성되었습니다.")
+    except ValueError as ve:
+        print(f"[ERROR] Validation Error: {ve}")
+        return error_response(error="VALIDATION_ERROR", message=str(ve))
+    except Exception as e:
+        print(f"[ERROR] Internal Server Error: {e}")
+        return error_response(error="INTERNAL_SERVER_ERROR", message=str(e))
+    
 # @router.post("/notifications/result-announcement/{recruit_id}")
 # async def create_result_announcement_notifications(recruit_id: int):
 #     """

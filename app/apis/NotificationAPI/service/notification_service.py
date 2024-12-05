@@ -54,32 +54,33 @@ class NotificationService:
             "service_announcement_count": service_announcement_count,
         }
 
+    @staticmethod
+    def create_result_notifications(recruit_id: int):
+        """
+        결과 발표 알림을 생성합니다.
+        """
+        print(f"[DEBUG] Starting result notification creation for recruit_id: {recruit_id}")
 
+        # 1. recruit_id로 회원 ID 목록 조회
+        member_ids = NotificationRepository.get_member_ids_by_recruit_id(recruit_id)
+        print(f"[DEBUG] Member IDs: {member_ids}")
 
-    
+        if not member_ids:
+            raise ValueError(f"No members found for recruit_id: {recruit_id}")
 
+        # 2. 알림 생성
+        notification_type = "결과 발표"
+        notification_title = "결과 발표 알림"
+        notification_content = f"리크루팅 {recruit_id}의 결과가 발표되었습니다."
+        notification_id = NotificationRepository.create_notification(
+            notification_type, notification_title, notification_content
+        )
+        print(f"[DEBUG] Notification ID created: {notification_id}")
 
-    # @staticmethod
-    # def create_result_notifications(recruit_id: int):
-    #     """
-    #     결과 발표 알림을 생성합니다.
-    #     """
-    #     # 1. 지원한 회원들의 ID 가져오기
-    #     member_ids = NotificationRepository.get_member_ids_by_recruit_id(recruit_id)
-    #     if not member_ids:
-    #         raise ValueError("No members found for the given recruit_id.")
-
-    #     # 2. 리크루팅 이름 가져오기
-    #     recruit_name = NotificationRepository.get_recruit_name(recruit_id)
-    #     if not recruit_name:
-    #         raise ValueError("Recruit name not found for the given recruit_id.")
-
-    #     # 3. 각 회원에게 알림 생성
-    #     for member_id in member_ids:
-    #         title = f"리크루팅 {recruit_name} 결과 발표"
-    #         content = f"리크루팅 '{recruit_name}'의 결과가 발표되었습니다."
-    #         NotificationRepository.insert_notification("결과 발표", title, content)
-    #         NotificationRepository.insert_notification_map(member_id)
+        # 3. 회원과 알림 매핑 생성
+        for member in member_ids:
+            print(f"[DEBUG] Mapping notification {notification_id} to member {member['member_id']}")
+            NotificationRepository.map_notification_to_member(member["member_id"], notification_id)
 
     # @staticmethod
     # def create_announcement_notifications(notification_content: str):
