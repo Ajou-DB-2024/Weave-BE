@@ -1,7 +1,11 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Depends, File, Query, UploadFile
 from typing import List, Optional
-from app.apis.ClubAPI.service.club_service import find_clubs, create_new_club, get_club_members, update_club_information, get_club_brief
+
+from fastapi.responses import FileResponse
+from app.apis.ClubAPI.service.club_service import delete_club_file, download_club_file, find_clubs, create_new_club, get_club_members, save_file, update_club_information, get_club_brief, upload_club_file
 from app.apis.ClubAPI.Models.clubmodel import ClubDetail, ClubBriefResponse, ClubDetailEdit, MemberListResponse
+from app.apis.MemberAPI.model import Member
+from app.apis.MemberAPI.service.auth_service import WeaveAuthService
 from app.common.response.formatter import error_response, success_response
 
 router = APIRouter()
@@ -44,6 +48,36 @@ async def update_club_detail(request: ClubDetailEdit):
     
     except ValueError as e:
         return error_response(error="INVALID_INPUT", message=str(e))
+
+@router.patch("/club/detailedit/files")
+async def upload_file(file: UploadFile = File(...), logined_user: Member = Depends(WeaveAuthService.digest_token)):
+    try:
+        # 서비스 계층으로 파일 업로드 요청 전달
+        result = await upload_club_file(file, logined_user.id)
+        return success_response(data=result, message="파일이 성공적으로 업로드되었습니다.")
+    
+    except Exception as e:
+        return error_response(error="SERVER_ERROR", message=str(e))
+
+@router.get("/club/detailedit/{file_id}")
+async def download_file(file_id: int, logined_user: Member = Depends(WeaveAuthService.digest_token)):
+    try:
+        file_path, original_filename = download_club_file(file_id, logined_user.id)
+        return FileResponse(file_path, media_type="application/octet-stream", filename=original_filename)
+    except ValueError as e:
+        return error_response(error="NOT_FOUND", message=str(e))
+    except Exception as e:
+        return error_response(error="SERVER_ERROR", message=str(e))
+
+@router.delete("/club/detailedit/{file_id}")
+async def delete_file(file_id: int, logined_user: Member = Depends(WeaveAuthService.digest_token)):
+    try:
+        delete_club_file(file_id, logined_user.id)
+        return success_response(message="파일이 성공적으로 삭제되었습니다.")
+    except ValueError as e:
+        return error_response(error="INVALID_INPUT", message=str(e))
+    except Exception as e:
+        return error_response(error="SERVER_ERROR", message=str(e))
 
 @router.post("/club/create")
 async def create_club(request: ClubDetail):  # 동아리 추가

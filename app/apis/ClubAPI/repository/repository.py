@@ -56,3 +56,22 @@ def get_club_brief_summary(club_id: int) -> dict:
 
 def get_members_by_club_id(club_id: int) -> list[dict]:
     return run_query(query.GET_MEMBERID_BY_CLUBID, (club_id,))
+
+def save_file_to_db(save_filename: str, org_filename: str, org_extension: str, created_by: int):
+    try: 
+        params = (save_filename, org_filename, org_extension, created_by)
+        run_query(query.FILE_UPLOAD, params)
+    except Exception as e:
+        raise Exception(f"파일 저장 중 오류가 발생했습니다: {str(e)}")
+    
+def get_file_info(file_id: int) -> dict:
+    # 파일 정보 조회
+    result = run_query(query.GET_FILE_INFO, (file_id,))
+    return result[0] if result else None
+
+def delete_file_from_db(file_id: int):
+    try:
+        # DB에서 파일 정보 삭제
+        run_query(query.DELETE_FILE, (file_id,))
+    except Exception as e:
+        raise Exception(f"파일 삭제 중 오류가 발생했습니다: {str(e)}")

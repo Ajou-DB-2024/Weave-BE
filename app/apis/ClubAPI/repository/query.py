@@ -52,3 +52,12 @@ GET_ROLE_BY_CLUBID = """
     FROM BELONGING 
     WHERE member_id = %s AND club_id = %s
     """
+
+FILE_UPLOAD = """
+            INSERT INTO FILE (save_filename, org_filename, org_extension, created_by)
+            VALUES (%s, %s, %s, %s);
+        """
+
+GET_FILE_INFO = "SELECT save_filename, org_filename, org_extension, created_by FROM FILE WHERE id = %s;"
+
+DELETE_FILE = "DELETE FROM FILE WHERE id = %s;"

@@ -1,4 +1,5 @@
 from typing import List, Optional
+from fastapi import UploadFile
 from pydantic import BaseModel
 from dataclasses import dataclass
 
@@ -25,6 +26,7 @@ class ClubDetailEdit(BaseModel):
     event_count: Optional[int] = None
     established_date: Optional[str] = None
     location: Optional[str] = None
+
 
 @dataclass
 class ClubBriefResponse(BaseModel):
