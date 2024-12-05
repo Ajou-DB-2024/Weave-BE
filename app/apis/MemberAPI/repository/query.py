@@ -9,3 +9,9 @@ MEMBER_CREATE = "INSERT INTO member (name, email, major, grade) VALUES (%s, %s, 
 
 MEMBER_FINDBY_ID = "SELECT * FROM member WHERE id = %s"
 MEMBER_FINDBY_EMAIL = "SELECT * FROM member WHERE email = %s"
+
+FIND_MEMBER_ROLE = """
+SELECT role
+FROM BELONGING
+WHERE member_id = %s AND club_id = %s
+"""

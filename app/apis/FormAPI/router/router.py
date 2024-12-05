@@ -26,7 +26,7 @@ async def create_form(data: FormCreate):
         # 알 수 없는 예외 처리
         return error_response(error="UNKNOWN_ERROR", message="An unexpected error occurred: " + str(e))
     
-@router.get("/form/:recruit_id")
+@router.get("/form/{recruit_id}")
 async def get_form(recruit_id: int):
     """
     특정 recruit_id에 해당하는 폼 데이터를 조회합니다.
@@ -47,7 +47,7 @@ async def get_form(recruit_id: int):
             message=str(e)
         )
     
-@router.get("/form/:club_id")
+@router.get("/form/{club_id}")
 async def get_forms(club_id: int):
     """
     특정 club_id에 해당하는 모든 폼 데이터를 조회합니다.

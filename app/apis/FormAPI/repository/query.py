@@ -34,5 +34,7 @@ JOIN RECRUIT r ON r.form_id = f.id
 WHERE r.club_id = %s;
 """
 
+
+
 # [TEST API]
 TEST_FINDBY_ID = "SELECT * FROM member WHERE id = %s"
