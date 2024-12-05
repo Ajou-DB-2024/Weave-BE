@@ -1,6 +1,9 @@
 import json
 import os
+import traceback
+
 from app.apis.MemberAPI.repository.repository import find_member_role
+
 
 DEPART_MAP = {}
 DEPARTMAP_FILEDIR = os.path.join(os.path.dirname(__file__), "../../../../", "data", "departmap.json")
@@ -22,6 +25,7 @@ class AjouService:
       return role
 
   def get_univ_depart(major: str):
+    print(DEPART_MAP)
     try:
       search_major = major.replace("전공", "")
       
@@ -35,7 +39,9 @@ class AjouService:
         "major": major
       }
 
-    except Exception:
+    except Exception as e:
+      print(e)
+      traceback.format_exc()
       return None
 
   def get_univ_course(job: str):
