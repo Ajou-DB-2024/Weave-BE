@@ -1,4 +1,6 @@
 from fastapi import APIRouter, Request
+from fastapi import UploadFile
+from fastapi import HTTPException
 from fastapi.responses import JSONResponse
 from app.apis.ApplyAPI.service.apply_service import ApplyService
 from app.apis.ApplyAPI.model.model import RecruitSearchRequest, SubmissionSave, MemberRequest, RecruitDeadline, RecruitCreate, VoteSubmission, RecruitResultOpenRequest
@@ -252,3 +254,48 @@ async def create_recruit(data: RecruitCreate, request: Request):
     except Exception as e:
         # 일반 에러 처리
         return error_response(error="DATABASE_ERROR", message=str(e))
+  
+
+@router.post("/apply/file/create")
+async def add_file(submission_id: int, answer_id: int, file: UploadFile):
+    """
+    파일을 저장하고 관련 정보를 DB에 추가합니다.
+    """
+    try:
+        # ApplyService에 모든 값을 전달
+        await ApplyService.add_file(submission_id=submission_id, answer_id=answer_id, file=file)
+        return success_response(message="파일이 성공적으로 업로드되었습니다.")
+    except Exception as e:
+        print(f"Error occurred while adding file: {e}")
+        return error_response(error="INTERNAL_SERVER_ERROR", message=str(e))
+
+
+@router.get("/apply/file/download/{file_id}")
+async def download_file(file_id: int):
+    """
+    파일을 다운로드합니다.
+    """
+    try:
+        return ApplyService.download_file(file_id)
+    except ValueError as ve:
+        print(f"Error: {ve}")
+        raise HTTPException(status_code=404, detail=str(ve))
+    except FileNotFoundError as fe:
+        print(f"Error: {fe}")
+        raise HTTPException(status_code=404, detail=str(fe))
+    except Exception as e:
+        print(f"Error occurred while adding file: {e}")
+        return error_response(error="INTERNAL_SERVER_ERROR", message=str(e))
+
+@router.delete("/apply/file/delete/{file_id}")
+async def delete_file(file_id: int):
+    """
+    파일을 삭제하고 관련 정보를 DB에서 제거합니다.
+    """
+    try:
+        ApplyService.delete_file(file_id)
+        return success_response(message="파일이 성공적으로 삭제되었습니다.")
+    except Exception as e:
+        print(f"Error occurred while adding file: {e}")
+        return error_response(error="INTERNAL_SERVER_ERROR", message=str(e))
+
