@@ -32,6 +32,9 @@ class SubmissionSave(BaseModel):
 class MemberRequest(BaseModel):
     member_id: int
 
+class RecruitResultOpenRequest(BaseModel):
+    recruit_id: int
+
 class RecruitDeadline(BaseModel):
     recruit_id: int
     end_date: Optional[datetime] = None
