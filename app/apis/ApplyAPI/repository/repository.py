@@ -110,15 +110,18 @@ class ApplyRepository:
         result = run_query(GET_CLUB_ID_FROM_RECRUIT, (recruit_id,))
         return result[0]["club_id"] if result else None
 
-    """
+
     @staticmethod
     def update_recruit_announcement_status(recruit_id: int) -> bool:
+        """
+        주어진 recruit_id에 해당하는 모든 submission의 is_announced 상태를 TRUE로 업데이트합니다.
+        """
         try:
-            result = run_query(UPDATE_ANNOUNCEMENT_STATUS, (recruit_id,))
-            return True if result else False
+            run_query(UPDATE_ANNOUNCEMENT_STATUS, (recruit_id,))
+            return True
         except Exception as e:
             raise Exception(f"Database error: {e}")
-    """
+
        
     @staticmethod
     def update_recruit_end_date(recruit_id: int, end_date: datetime):
