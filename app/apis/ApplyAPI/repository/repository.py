@@ -1,6 +1,6 @@
 from app.db import run_query
 from datetime import datetime
-from app.apis.ApplyAPI.repository.query import SEARCH_RECRUIT, INSERT_SUBMISSION, INSERT_ANSWER, GET_SUBMISSION_ID, SELECT_QUESTION_ANSWERS, SELECT_SUBMISSION_LIST, UPDATE_SUBMISSION_STATUS, GET_ADMISSION_LIST, GET_ADMISSION_RESULT, UPDATE_SUBMISSION_RESULT, CHECK_IF_EXECUTIVE, UPDATE_ANNOUNCEMENT_STATUS, UPDATE_RECRUIT_END_DATE, SELECT_RECRUIT_DETAIL, SELECT_RECRUIT_LIST, GET_RECRUIT_STATUS, INSERT_RECRUIT
+from app.apis.ApplyAPI.repository.query import SEARCH_RECRUIT, INSERT_SUBMISSION, INSERT_ANSWER, GET_SUBMISSION_ID, SELECT_QUESTION_ANSWERS, SELECT_SUBMISSION_LIST, UPDATE_SUBMISSION_STATUS, GET_ADMISSION_LIST, GET_ADMISSION_RESULT, UPDATE_SUBMISSION_RESULT, GET_CLUB_ID_FROM_RECRUIT, UPDATE_ANNOUNCEMENT_STATUS, UPDATE_RECRUIT_END_DATE, SELECT_RECRUIT_DETAIL, SELECT_RECRUIT_LIST, GET_RECRUIT_STATUS, INSERT_RECRUIT
 
 class ApplyRepository:
     @staticmethod
@@ -103,15 +103,12 @@ class ApplyRepository:
             raise Exception(f"Database error while updating submission result: {e}")
 
     @staticmethod
-    def check_member_role(member_id: int, club_id: int):
+    def get_club_id_from_recruit(recruit_id: int) -> int:
         """
-        member_id와 club_id를 기반으로 임원진 권한을 확인합니다.
+        recruit_id로 club_id를 조회합니다.
         """
-        try:
-            result = run_query(CHECK_IF_EXECUTIVE, (member_id, club_id))
-            return bool(result)  # 데이터가 존재하면 True
-        except Exception as e:
-            raise Exception(f"Database error while checking member role: {e}")
+        result = run_query(GET_CLUB_ID_FROM_RECRUIT, (recruit_id,))
+        return result[0]["club_id"] if result else None
 
     """
     @staticmethod

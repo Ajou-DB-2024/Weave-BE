@@ -42,4 +42,11 @@ def create_member(user_info: Member.Member) -> Member.Member:
     user_info['id'] = member_id
     return user_info
 
+def find_member_role(member_id: int, club_id: int) -> str:
+    """
+    DB에서 member_id와 club_id로 역할(role)을 찾습니다.
+    """
+    result = DBQueryRunner.run_query(query.FIND_MEMBER_ROLE, (member_id, club_id))
+    return result[0]["role"] if result else None
+
     

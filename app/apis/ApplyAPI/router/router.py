@@ -1,7 +1,7 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from app.apis.ApplyAPI.service.apply_service import ApplyService
-from app.apis.ApplyAPI.model.model import RecruitSearchRequest, SubmissionSave, MemberRequest, RecruitDeadline, RecruitCreate
+from app.apis.ApplyAPI.model.model import RecruitSearchRequest, SubmissionSave, MemberRequest, RecruitDeadline, RecruitCreate, VoteSubmission
 
 from app.common.response.formatter import success_response, error_response
 
@@ -105,12 +105,21 @@ async def get_admission_result(submission_id: int):
         return error_response(error="ADMISSION_RESULT_ERROR", message=str(e))
     
 @router.post("/apply/recruit/result/vote")
-async def vote_submission_result(member_id: int, club_id: int, submission_id: int, status: str):
+async def vote_submission_result(data: VoteSubmission, request: Request):
     """
     임원진이 지원자에 대한 합/불 상태를 결정합니다.
     """
     try:
-        result = ApplyService.vote_submission_result(member_id, club_id, submission_id, status)
+        # JWT 정보를 활용하여 member_id 추출
+        member_info = request.state.member_info
+        member_id = member_info.get("sub")
+
+        result = ApplyService.vote_submission_result(
+            member_id=member_id,
+            recruit_id=data.recruit_id,
+            submission_id=data.submission_id,
+            status=data.status
+        )
         return success_response(message="결정 완료", data=result)
     except PermissionError as pe:
         return error_response(error="PERMISSION_DENIED", message=str(pe))
