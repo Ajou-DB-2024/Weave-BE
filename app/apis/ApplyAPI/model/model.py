@@ -32,6 +32,9 @@ class SubmissionSave(BaseModel):
 class MemberRequest(BaseModel):
     member_id: int
 
+class RecruitResultOpenRequest(BaseModel):
+    recruit_id: int
+
 class RecruitDeadline(BaseModel):
     recruit_id: int
     end_date: Optional[datetime] = None
@@ -54,4 +57,9 @@ class RecruitCreate(BaseModel):
     recruit_end_date: datetime = Field(..., description="리크루팅 종료 날짜")
     form_id: int = Field(..., description="연결할 폼 ID")
     club_id: int = Field(..., description="클럽 ID")
+
+class VoteSubmission(BaseModel):
+    recruit_id: int
+    submission_id: int
+    status: str
         
