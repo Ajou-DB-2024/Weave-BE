@@ -1,9 +1,9 @@
 from app.db import run_query
 from app.apis.NotificationAPI.repository.query import (
     GET_NOTIFICATION_BY_ID,
-    # GET_NOTIFICATIONS_BY_MEMBER_ID,
-    # GET_RESULT_ANNOUNCEMENT_COUNT,
-    # GET_SERVICE_ANNOUNCEMENT_COUNT,
+    GET_NOTIFICATIONS_BY_MEMBER_ID,
+    GET_RESULT_ANNOUNCEMENT_COUNT,
+    GET_SERVICE_ANNOUNCEMENT_COUNT,
     # GET_MEMBER_IDS_BY_RECRUIT_ID,
     # INSERT_NOTIFICATION,
     # INSERT_NOTIFICATION_MAP,
@@ -22,27 +22,22 @@ class NotificationRepository:
         """
         return run_query(GET_NOTIFICATION_BY_ID, (notification_id,))
 
-    # @staticmethod
-    # def get_notifications_by_member_id(member_id: int) -> list:
-    #     """
-    #     특정 회원의 알림 목록 데이터를 조회합니다.
-    #     """
-    #     return run_query(GET_NOTIFICATIONS_BY_MEMBER_ID, (member_id,))
+    @staticmethod
+    def get_notifications_by_member_id(member_id: int) -> list:
+        """
+        특정 회원의 알림 목록 데이터를 조회합니다.
+        """
+        return run_query(GET_NOTIFICATIONS_BY_MEMBER_ID, (member_id,))
 
-    # @staticmethod
-    # def get_result_announcement_count(member_id: int) -> list:
-    #     """
-    #     특정 회원의 결과 발표 알림 개수를 조회합니다.
-    #     """
-    #     return run_query(GET_RESULT_ANNOUNCEMENT_COUNT, (member_id,))
+    @staticmethod
+    def get_result_announcement_count(member_id: int) -> list:
+        result = run_query(GET_RESULT_ANNOUNCEMENT_COUNT, (member_id,))
+        return result
 
-    # @staticmethod
-    # def get_service_announcement_count(member_id: int) -> list:
-    #     """
-    #     특정 회원의 서비스 공지사항 알림 개수를 조회합니다.
-    #     """
-    #     return run_query(GET_SERVICE_ANNOUNCEMENT_COUNT, (member_id,))
-
+    @staticmethod
+    def get_service_announcement_count(member_id: int) -> list:
+        result = run_query(GET_SERVICE_ANNOUNCEMENT_COUNT, (member_id,))
+        return result
 
 
     # @staticmethod

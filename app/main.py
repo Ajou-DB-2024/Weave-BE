@@ -5,7 +5,6 @@ from fastapi import FastAPI
 from app.middlewares.log import log_requests
 
 from app.apis.TestAPI.router import router as TestRouter
-from app.apis.FormAPI.router import router as FormRouter
 from app.apis.NotificationAPI.router import router as NotificationRouter
 
 # FastAPI 앱 생성
@@ -18,8 +17,6 @@ app = FastAPI(
 # 라우터 등록
 app.include_router(TestRouter.router, prefix="/api/v0", tags=["Test"])
 
-# dev/newbiehwang FormAPI router 추가
-app.include_router(FormRouter.router, prefix="/api/v0", tags=["Form"])
 
 # dev/dah NotificationAPI router 추가
 app.include_router(NotificationRouter.router, prefix="/api/v0", tags=["Notification"])
@@ -37,3 +34,8 @@ if __name__ == "__main__":
         port=settings.PORT,        # 포트 번호
         reload=settings.PY_ENV == "development" # 코드 변경 시 자동 재시작 (개발용 옵션)
     )
+
+# 디버깅용 라우터 출력
+print("Registered Routes:")
+for route in app.routes:
+    print(route.path, route.name)

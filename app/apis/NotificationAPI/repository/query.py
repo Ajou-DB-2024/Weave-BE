@@ -5,26 +5,26 @@ FROM notification
 WHERE id = %s;
 """
 # 알림 전체 조회
-# GET_NOTIFICATIONS_BY_MEMBER_ID = """
-# SELECT n.id AS notification_id, n.notification_type AS notification_type, n.title AS title, n.content AS content, n.created_at AS created_at
-# FROM notification n
-# JOIN notification_map nm ON n.id = nm.notification_id
-# WHERE nm.member_id = %s;
-# """
+GET_NOTIFICATIONS_BY_MEMBER_ID = """
+SELECT n.id AS notification_id, n.notification_type AS notification_type, n.title AS title, n.content AS content, n.created_at AS created_at
+FROM notification n
+JOIN notification_map nm ON n.id = nm.notification_id
+WHERE nm.member_id = %s;
+"""
 
-# GET_RESULT_ANNOUNCEMENT_COUNT = """
-# SELECT COUNT(*)
-# FROM notification n
-# JOIN notification_map nm ON n.id = nm.notification_id
-# WHERE nm.member_id = %s AND n.notification_type = '지원현황';
-# """
+GET_RESULT_ANNOUNCEMENT_COUNT = """
+SELECT COUNT(*)
+FROM notification n
+JOIN notification_map nm ON n.id = nm.notification_id
+WHERE nm.member_id = %s AND n.notification_type = '지원현황';
+"""
 
-# GET_SERVICE_ANNOUNCEMENT_COUNT = """
-# SELECT COUNT(*)
-# FROM notification n
-# JOIN notification_map nm ON n.id = nm.notification_id
-# WHERE nm.member_id = %s AND n.notification_type = '공지사항';
-# """
+GET_SERVICE_ANNOUNCEMENT_COUNT = """
+SELECT COUNT(*)
+FROM notification n
+JOIN notification_map nm ON n.id = nm.notification_id
+WHERE nm.member_id = %s AND n.notification_type = '공지사항';
+"""
 
 # # 결과 알림 생성
 # # 이거 연동 필요

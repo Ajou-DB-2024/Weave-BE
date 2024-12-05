@@ -22,38 +22,38 @@ class NotificationService:
             "created_at": notification["created_at"]
         }
 
-    # @staticmethod
-    # def get_notifications(member_id: int) -> dict:
-    #     """
-    #     특정 회원의 모든 알림 데이터를 반환합니다.
-    #     """
-    #     print(f"Fetching notifications for member_id: {member_id}")  # 디버깅용
-    #     raw_notifications = NotificationRepository.get_notifications_by_member_id(member_id)
-    #     print(f"Raw notifications: {raw_notifications}")  # 디버깅용
+    @staticmethod
+    def get_notifications(member_id: int) -> dict:
+        """
+        특정 회원의 모든 알림 데이터를 반환합니다.
+        """
+        raw_notifications = NotificationRepository.get_notifications_by_member_id(member_id)
 
-    #     notifications = [
-    #         {
-    #             "notification_id": row[0],
-    #             "notification_type": row[1],
-    #             "title": row[2],
-    #             "content": row[3],
-    #             "created_at": row[4],
-    #         }
-    #         for row in raw_notifications
-    #     ]
-    #     print(f"Processed notifications: {notifications}")  # 디버깅용
+        notifications = [
+            {
+                "notification_id": row["notification_id"],
+                "notification_type": row["notification_type"],
+                "title": row["title"],
+                "content": row["content"],
+                "created_at": row["created_at"]
+            }
+            for row in raw_notifications
+        ]
 
-    #     result_announcement_count = NotificationRepository.get_result_announcement_count(member_id)
-    #     service_announcement_count = NotificationRepository.get_service_announcement_count(member_id)
+        # 결과 발표 알림 개수와 서비스 공지사항 알림 개수 가져옴
+        result_announcement_count = NotificationRepository.get_result_announcement_count(member_id)
+        result_announcement_count = result_announcement_count[0]["COUNT(*)"] if result_announcement_count else 0
 
-    #     print(f"Result announcement count: {result_announcement_count}")  # 디버깅용
-    #     print(f"Service announcement count: {service_announcement_count}")  # 디버깅용
+        service_announcement_count = NotificationRepository.get_service_announcement_count(member_id)
+        service_announcement_count = service_announcement_count[0]["COUNT(*)"] if service_announcement_count else 0
 
-    #     return {
-    #         "notifications": notifications,
-    #         "result_announcement_count": result_announcement_count[0][0] if result_announcement_count else 0,
-    #         "service_announcement_count": service_announcement_count[0][0] if service_announcement_count else 0,
-    #     }
+
+        return {
+            "notifications": notifications,
+            "result_announcement_count": result_announcement_count,
+            "service_announcement_count": service_announcement_count,
+        }
+
 
 
     

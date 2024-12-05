@@ -29,28 +29,23 @@ async def get_notification(noti_id: int):
         return error_response(error="INTERNAL_SERVER_ERROR", message=str(e))
 
 
-# @router.get("/noti/list/{member_id}")
-# async def get_notifications(member_id: int):
-#     """
-#     특정 회원 ID를 기반으로 알림 목록을 조회합니다.
-#     """
-#     try:
-#         print(f"Fetching notifications for member_id: {member_id}")  # 디버깅용 로그
-#         notifications = NotificationService.get_notifications(member_id)
-#         if not notifications["notifications"]:  # 알림 데이터가 없는 경우 처리
-#             print(f"No notifications found for member_id: {member_id}")  # 디버깅용 로그
-#             return error_response(
-#                 error="NOTIFICATIONS_NOT_FOUND",
-#                 message="No notifications found for the given member_id."
-#             )
-#         print(f"Notifications fetched successfully: {notifications}")  # 디버깅용 로그
-#         return success_response(data=notifications)
-#     except ValueError as ve:
-#         print(f"Validation Error: {ve}")  # 디버깅용 로그
-#         return error_response(error="VALIDATION_ERROR", message=str(ve))
-#     except Exception as e:
-#         print(f"Unhandled Error in get_notifications: {e}")  # 디버깅용 로그
-#         return error_response(error="INTERNAL_SERVER_ERROR", message=str(e))
+@router.get("/noti/list/{member_id}")
+async def get_notifications(member_id: int):
+    """
+    특정 회원 ID를 기반으로 알림 목록을 조회합니다.
+    """
+    try:
+        notifications = NotificationService.get_notifications(member_id)
+        if not notifications["notifications"]:  # 알림 데이터가 없는 경우 처리
+            return error_response(
+                error="NOTIFICATIONS_NOT_FOUND",
+                message="No notifications found for the given member_id."
+            )
+        return success_response(data=notifications)
+    except ValueError as ve:
+        return error_response(error="VALIDATION_ERROR", message=str(ve))
+    except Exception as e:
+        return error_response(error="INTERNAL_SERVER_ERROR", message=str(e))
 
 
 # @router.post("/notifications/result-announcement/{recruit_id}")
