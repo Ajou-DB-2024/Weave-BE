@@ -7,9 +7,12 @@ from app.middlewares.token_validator import JWTAuthMiddleware
 from app.schemas.openapi_schema import custom_openapi
 
 from app.apis.TestAPI.router import router as TestRouter
+
+from app.apis.NotificationAPI.router import router as NotificationRouter
 from app.apis.MemberAPI.router import router as MemberRouter
 from app.apis.FormAPI.router import router as FormRouter
 from app.apis.ApplyAPI.router import router as ApplyRouter
+
 
 # FastAPI 앱 생성
 app = FastAPI(
@@ -35,8 +38,9 @@ app.include_router(MemberRouter.router, prefix="/api/v0", tags=["Member"])
 app.include_router(FormRouter.router, prefix="/api/v0", tags=["Form"])
 app.include_router(ApplyRouter.router, prefix="/api/v0", tags=["Apply"])
 
-# dev/newbiehwang FormAPI router 추가
-app.include_router(FormRouter.router, prefix="/api/v0", tags=["Form"])
+
+# dev/dah NotificationAPI router 추가
+app.include_router(NotificationRouter.router, prefix="/api/v0", tags=["Notification"])
 
 # dev/newbiehwang ApplyAPI router 추가
 app.include_router(ApplyRouter.router, prefix="/api/v0", tags=["Apply"])
@@ -50,3 +54,4 @@ if __name__ == "__main__":
         port=settings.PORT,        # 포트 번호
         reload=settings.PY_ENV == "development" # 코드 변경 시 자동 재시작 (개발용 옵션)
     )
+
