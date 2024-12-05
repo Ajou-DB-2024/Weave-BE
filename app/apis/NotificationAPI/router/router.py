@@ -63,22 +63,24 @@ async def create_result_announcement_notifications(recruit_id: int):
         print(f"[ERROR] Internal Server Error: {e}")
         return error_response(error="INTERNAL_SERVER_ERROR", message=str(e))
     
-# @router.post("/notifications/result-announcement/{recruit_id}")
-# async def create_result_announcement_notifications(recruit_id: int):
-#     """
-#     결과 발표 시 관련 회원들에게 알림을 생성합니다.
-#     """
-#     try:
-#         print(f"Creating result notifications for recruit_id: {recruit_id}")  # 디버깅용 로그
-#         NotificationService.create_result_notifications(recruit_id)
-#         print(f"Result notifications created successfully for recruit_id: {recruit_id}")  # 디버깅용 로그
-#         return success_response(message="결과 발표 알림이 성공적으로 생성되었습니다.")
-#     except ValueError as ve:
-#         print(f"Validation Error: {ve}")  # 디버깅용 로그
-#         return error_response(error="VALIDATION_ERROR", message=str(ve))
-#     except Exception as e:
-#         print(f"Unhandled Error in create_result_announcement_notifications: {e}")  # 디버깅용 로그
-#         return error_response(error="INTERNAL_SERVER_ERROR", message=str(e))
+
+@router.post("/notifications/announcement/")
+async def create_announcement_notification(notification_type: str, title: str, content: str):
+    """
+    공지사항 알림을 생성하고 모든 회원에게 알림을 전송합니다.
+    """
+    try:
+        print(f"Received announcement data: type={notification_type}, title={title}, content={content}")
+        # 공지사항 알림 생성 서비스 호출
+        NotificationService.create_announcement_notification(notification_type, title, content)
+        print("Announcement notification created successfully.")
+        return success_response(message="공지사항 알림이 성공적으로 생성되었습니다.")
+    except ValueError as ve:
+        print(f"Validation error occurred: {ve}")
+        return error_response(error="VALIDATION_ERROR", message=str(ve))
+    except Exception as e:
+        print(f"Error occurred during announcement notification creation: {e}")
+        return error_response(error="INTERNAL_SERVER_ERROR", message=str(e))
 
 
 # @router.post("/notifications/announcement/")

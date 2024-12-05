@@ -82,25 +82,24 @@ class NotificationService:
             print(f"[DEBUG] Mapping notification {notification_id} to member {member['member_id']}")
             NotificationRepository.map_notification_to_member(member["member_id"], notification_id)
 
-    # @staticmethod
-    # def create_announcement_notifications(notification_content: str):
-    #     """
-    #     공지사항 알림을 생성합니다.
-    #     """
-    #     # 1. 모든 회원 ID 가져오기
-    #     member_ids = NotificationRepository.get_all_member_ids()
-    #     if not member_ids:
-    #         raise ValueError("No members found in the system.")
+    @staticmethod
+    def create_announcement_notification(notification_type: str, title: str, content: str):
+        """
+        공지사항 알림을 생성하고 모든 회원에게 매핑합니다.
+        """
+        # 1. 알림 생성
+        notification_id = NotificationRepository.create_notification(notification_type, title, content)
+        print(f"Notification ID created: {notification_id}")
 
-    #     # 2. 공지사항 알림 생성
-    #     for member_id in member_ids:
-    #         NotificationRepository.insert_notification(
-    #             notification_type="공지사항",
-    #             title="시스템 공지사항",
-    #             content=notification_content
-    #         )
-    #         NotificationRepository.insert_notification_map(member_id)
+        # 2. 모든 회원 ID 조회
+        member_ids = NotificationRepository.get_all_member_ids()
+        if not member_ids:
+            raise ValueError("No members found.")
 
+        # 3. 회원과 알림 매핑 생성
+        for member in member_ids:
+            NotificationRepository.map_notification_to_member(member["member_id"], notification_id)
+        print(f"Notification mapped to all members successfully.")
 
     # @staticmethod
     # def create_closing_reminder_notifications(recruit_id: int):

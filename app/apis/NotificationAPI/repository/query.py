@@ -43,11 +43,10 @@ INSERT INTO notification_map (member_id, notification_id)
 VALUES (%s, %s);
 """
 
-# # 공지사항 알림 생성
-# GET_ALL_MEMBER_IDS = """
-# SELECT id
-# FROM member;
-# """
+# # 회원 목록 조회
+GET_ALL_MEMBER_IDS = """
+SELECT id AS member_id FROM member;
+"""
 
 # # end_date 하루 전인 리크루팅의 회원 ID 조회
 # GET_MEMBER_IDS_BY_RECRUIT_ID_AND_END_DATE = """

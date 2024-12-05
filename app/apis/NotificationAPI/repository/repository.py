@@ -7,6 +7,7 @@ from app.apis.NotificationAPI.repository.query import (
     GET_MEMBER_IDS_BY_RECRUIT_ID,
     INSERT_NOTIFICATION,
     INSERT_NOTIFICATION_MAP,
+    GET_ALL_MEMBER_IDS
     # GET_RECRUIT_NAME,
     # GET_ALL_MEMBER_IDS,
     # INSERT_NOTIFICATION,
@@ -71,26 +72,20 @@ class NotificationRepository:
         print(f"[DEBUG] Mapping result: {result}")
         return result
     
-   # @staticmethod
-    # def get_all_member_ids() -> list:
-    #     """
-    #     모든 회원 ID를 반환합니다.
-    #     """
-    #     return [row[0] for row in run_query(GET_ALL_MEMBER_IDS)]
+    
+    @staticmethod
+    def get_all_member_ids() -> list:
+        """
+        모든 회원 ID를 조회합니다.
+        """
+        print("Fetching all member IDs...")
+        result = run_query(GET_ALL_MEMBER_IDS)
+        print(f"Member IDs fetched: {result}")
+        return result
 
-    # @staticmethod
-    # def insert_notification(notification_type: str, title: str, content: str):
-    #     """
-    #     알림 데이터를 삽입합니다.
-    #     """
-    #     run_query(INSERT_NOTIFICATION, (notification_type, title, content))
 
-    # @staticmethod
-    # def insert_notification_map(member_id: int):
-    #     """
-    #     Notification Map에 데이터를 삽입합니다.
-    #     """
-    #     run_query(INSERT_NOTIFICATION_MAP, (member_id,))
+    
+   
 
     # @staticmethod
     # def create_closing_reminder_notifications(recruit_id: int):
