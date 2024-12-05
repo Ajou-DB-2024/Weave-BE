@@ -1,6 +1,7 @@
 from app.apis.FormAPI.service.form_service import FormService
 # from app.apis.NotificationAPI.service.notification_service import NotificationService
 from app.apis.ApplyAPI.repository.repository import ApplyRepository
+from app.apis.MemberAPI.service.college_service import AjouService
 from datetime import datetime
 
 class ApplyService:
@@ -94,12 +95,18 @@ class ApplyService:
         return ApplyRepository.get_admission_result(submission_id)
     
     @staticmethod
-    def vote_submission_result(member_id: int, club_id: int, submission_id: int, status: str):
+    def vote_submission_result(member_id: int, recruit_id: int, submission_id: int, status: str):
         """
-        임원진 권한을 확인하고, 지원서 상태를 업데이트합니다.
+        recruit_id로 club_id를 찾아 역할을 확인하고 지원서 상태를 업데이트합니다.
         """
-        # 권한 확인
-        if not ApplyRepository.check_member_role(member_id, club_id):
+        # recruit_id를 통해 club_id 조회
+        club_id = ApplyRepository.get_club_id_from_recruit(recruit_id)
+        if not club_id:
+            raise ValueError("Invalid recruit_id. Club not found.")
+
+        # 역할 확인
+        role = AjouService.get_member_role(member_id, club_id)
+        if role == "MEMBER" or role is None:
             raise PermissionError("You do not have permission to vote.")
 
         # 지원서 상태 업데이트

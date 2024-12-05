@@ -3,6 +3,8 @@ from app.config import settings
 
 from fastapi import FastAPI
 from app.middlewares.log import log_requests
+from app.middlewares.token_validator import JWTAuthMiddleware
+from app.schemas.openapi_schema import custom_openapi
 
 from app.apis.TestAPI.router import router as TestRouter
 from app.apis.MemberAPI.router import router as MemberRouter
@@ -16,6 +18,17 @@ app = FastAPI(
     version="0.1.0",  # API 버전
 )
 
+# OpenAPI 스키마 설정
+app.openapi = lambda: custom_openapi(app)
+
+# JWT 미들웨어 추가
+app.add_middleware(JWTAuthMiddleware)
+
+# 요청 및 응답 로깅 미들웨어 추가
+@app.middleware("http")
+async def log_middleware(request, call_next):
+    return await log_requests(request, call_next)
+
 # 라우터 등록
 app.include_router(TestRouter.router, prefix="/api/v0", tags=["Test"])
 app.include_router(MemberRouter.router, prefix="/api/v0", tags=["Member"])
@@ -28,10 +41,6 @@ app.include_router(FormRouter.router, prefix="/api/v0", tags=["Form"])
 # dev/newbiehwang ApplyAPI router 추가
 app.include_router(ApplyRouter.router, prefix="/api/v0", tags=["Apply"])
 
-# 미들웨어나 이벤트 핸들러 추가 가능
-@app.middleware("http")
-async def middleware_wrapper(request, call_next):
-    return await log_requests(request, call_next)
 
 # 애플리케이션 실행
 if __name__ == "__main__":

@@ -81,12 +81,6 @@ SET result = %s
 WHERE id = %s;
 """
 
-CHECK_IF_EXECUTIVE = """
-SELECT 1
-FROM BELONGING
-WHERE member_id = %s AND club_id = %s AND role IN ('PRESIDENT', 'VICE_PRESIDENT', 'EXECUTIVE');
-"""
-
 UPDATE_ANNOUNCEMENT_STATUS = """
 UPDATE RECRUIT
 SET is_announced = TRUE
@@ -138,4 +132,10 @@ GROUP BY R.end_date
 INSERT_RECRUIT = """
 INSERT INTO RECRUIT (name, start_date, end_date, form_id, status)
 VALUES (%s, %s, %s, %s, 'OPEN');
+"""
+
+GET_CLUB_ID_FROM_RECRUIT = """
+SELECT club_id
+FROM RECRUIT
+WHERE id = %s
 """
