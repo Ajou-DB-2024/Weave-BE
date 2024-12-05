@@ -21,9 +21,6 @@ def check_club_exists(name: str) -> bool:
 
 def create_club(name: str, club_depart: str, club_type: str, president_id: int) -> dict:
     #동아리 추가
-    # 동아리 존재 여부 확인
-    if check_club_exists(name):
-        raise ValueError("Club name already exists")
 
     run_query(query.ADD_CLUB, (name, club_depart, club_type))
     

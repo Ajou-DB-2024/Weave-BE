@@ -46,3 +46,9 @@ GET_MEMBERID_BY_CLUBID = """
     JOIN BELONGING b ON m.id = b.member_id
     WHERE b.club_id = %s
     """
+
+GET_ROLE_BY_CLUBID = """
+    SELECT role
+    FROM BELONGING 
+    WHERE member_id = %s AND club_id = %s
+    """
