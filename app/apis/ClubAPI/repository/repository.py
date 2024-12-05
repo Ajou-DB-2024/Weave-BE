@@ -58,6 +58,7 @@ def get_members_by_club_id(club_id: int) -> list[dict]:
     return run_query(query.GET_MEMBERID_BY_CLUBID, (club_id,))
 
 def save_file_to_db(save_filename: str, org_filename: str, org_extension: str, created_by: int):
+    
     try: 
         params = (save_filename, org_filename, org_extension, created_by)
         run_query(query.FILE_UPLOAD, params)
@@ -69,9 +70,23 @@ def get_file_info(file_id: int) -> dict:
     result = run_query(query.GET_FILE_INFO, (file_id,))
     return result[0] if result else None
 
+def find_file_id_by_name(file_name: str) -> Optional[int]:
+
+    try:
+        result = run_query(query.GET_FILEID_BYFILENAME, (file_name,))
+        return result[0]["id"] if result else None
+    except Exception as e:
+        raise Exception("파일 찾기 오류")
+
+def map_file_to_club(file_id: int, club_id: int):
+    run_query(query.MAP_FILE_CLUB, (file_id, club_id))
+
 def delete_file_from_db(file_id: int):
     try:
         # DB에서 파일 정보 삭제
         run_query(query.DELETE_FILE, (file_id,))
     except Exception as e:
         raise Exception(f"파일 삭제 중 오류가 발생했습니다: {str(e)}")
+    
+def unmap_file_from_club(file_id: int):
+    run_query(query.DELETE_FILE_MAP, (file_id))

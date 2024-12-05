@@ -11,16 +11,18 @@ from app.common.response.formatter import error_response, success_response
 router = APIRouter()
 
 @router.get("/club/members", response_model=MemberListResponse)
-async def club_members(club_id: int = Query(...)):
+async def club_members(club_id: int = Query(...), logined_user: Member = Depends(WeaveAuthService.digest_token)):
     if not club_id:
         return error_response(error="INVALID_INPUT", message="club_id는 필수 입력입니다.")
     
     try:
-        members = get_club_members(club_id)
+        members = get_club_members(logined_user.id, club_id)
         return success_response(data={"member_ids": members}, message="Club members retrieved successfully")
       
     except Exception as e:
         return error_response(error="SERVER_ERROR", message=str(e))
+    except PermissionError as e:
+        return error_response(error="FORBIDDEN", message=str(e))
 
 @router.get("/club/brief", response_model=ClubBriefResponse)
 async def club_brief(club_id: int):
@@ -32,7 +34,7 @@ async def club_brief(club_id: int):
         return error_response(error="NOT_FOUND", message=str(e))
 
 @router.patch("/club/detailedit")
-async def update_club_detail(request: ClubDetailEdit):
+async def update_club_detail(request: ClubDetailEdit, logined_user: Member = Depends(WeaveAuthService.digest_token)):
     try:
         update_club_information(
             request.club_id,
@@ -42,24 +44,29 @@ async def update_club_detail(request: ClubDetailEdit):
             request.edu_count,
             request.event_count,
             request.established_date,
-            request.location
+            request.location,
+            logined_user.id
         )
         return success_response(data=None, message="동아리 정보가 성공적으로 수정되었습니다.")
     
     except ValueError as e:
         return error_response(error="INVALID_INPUT", message=str(e))
+    except PermissionError as e:
+        return error_response(error="FORBIDDEN", message=str(e))
 
-@router.patch("/club/detailedit/files")
-async def upload_file(file: UploadFile = File(...), logined_user: Member = Depends(WeaveAuthService.digest_token)):
+@router.patch("/club/detailedit/files") #file upload
+async def upload_file(club_id: int, file: UploadFile = File(...), logined_user: Member = Depends(WeaveAuthService.digest_token)):
     try:
         # 서비스 계층으로 파일 업로드 요청 전달
-        result = await upload_club_file(file, logined_user.id)
+        result = await upload_club_file(file, logined_user.id, club_id)
         return success_response(data=result, message="파일이 성공적으로 업로드되었습니다.")
     
     except Exception as e:
         return error_response(error="SERVER_ERROR", message=str(e))
+    except PermissionError as e:
+        return error_response(error="FORBIDDEN", message=str(e))
 
-@router.get("/club/detailedit/{file_id}")
+@router.get("/club/detailedit/{file_id}") #file download
 async def download_file(file_id: int, logined_user: Member = Depends(WeaveAuthService.digest_token)):
     try:
         file_path, original_filename = download_club_file(file_id, logined_user.id)
@@ -69,7 +76,7 @@ async def download_file(file_id: int, logined_user: Member = Depends(WeaveAuthSe
     except Exception as e:
         return error_response(error="SERVER_ERROR", message=str(e))
 
-@router.delete("/club/detailedit/{file_id}")
+@router.delete("/club/detailedit/{file_id}") #file delete
 async def delete_file(file_id: int, logined_user: Member = Depends(WeaveAuthService.digest_token)):
     try:
         delete_club_file(file_id, logined_user.id)

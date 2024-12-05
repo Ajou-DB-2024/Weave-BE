@@ -1,11 +1,17 @@
 import datetime
 import os
 from typing import List, Optional
-from app.apis.ClubAPI.repository.repository import check_club_exists, delete_file_from_db, find_club_by_name, find_clubs_by_tags, create_club, get_file_info, get_members_by_club_id, save_file_to_db, update_club_detail, get_club_brief_summary
+from app.apis.ClubAPI.repository.repository import check_club_exists, delete_file_from_db, find_club_by_name, find_clubs_by_tags, create_club, find_file_id_by_name, get_file_info, get_members_by_club_id, map_file_to_club, save_file_to_db, unmap_file_from_club, update_club_detail, get_club_brief_summary
+from app.apis.MemberAPI.service.college_service import AjouService
 
 FILES_DIR = "files"  # 파일 저장 경로
 
-async def upload_club_file(file, user_id: int):
+async def upload_clubdetail_file(file, user_id: int, club_id: int):
+    
+    role = AjouService.get_member_role(user_id, club_id)
+    if role not in ["PRESIDENT", "VICE_PRESIDENT"]:
+        raise PermissionError("권한이 없습니다. (회장 또는 부회장만 접근 가능)") 
+ 
     try:
         # 현재 시간을 초 단위로 가져옴
         timestamp = int(datetime.utcnow().timestamp())
@@ -26,6 +32,7 @@ async def upload_club_file(file, user_id: int):
             org_extension=file_extension,
             created_by=user_id
         )
+        map_file_to_club(find_file_id_by_name(save_filename), club_id)
 
         return {"file_path": file_location, "original_filename": file.filename}
     
@@ -62,6 +69,7 @@ def delete_club_file(file_id: int, user_id: int):
         os.remove(file_path)
 
     # DB에서 파일 삭제
+    unmap_file_from_club(file_id)
     delete_file_from_db(file_id)
 
 def find_clubs(name: Optional[str] = None, tag_ids: Optional[List[int]] = None):
@@ -104,14 +112,23 @@ def create_new_club(name: str, club_depart: str, club_type: str, president_id: i
 def update_club_information(club_id: int, description: Optional[str], study_count: Optional[int], 
                              award_count: Optional[int], edu_count: Optional[int], 
                              event_count: Optional[int], established_date: Optional[str], 
-                             location: Optional[str]) -> None:
+                             location: Optional[str], user_id: int) -> None:
+  
+    role = AjouService.get_member_role(user_id, club_id) 
+    if role not in ["PRESIDENT", "VICE_PRESIDENT"]:
+        raise PermissionError("권한이 없습니다. (회장 또는 부회장만 접근 가능)") 
+
     #동아리 정보를 수정하는 서비스 함수.
     update_club_detail(club_id, description, study_count, award_count, edu_count, event_count, established_date, location)
 
 def get_club_brief(club_id: int) -> dict:
     return get_club_brief_summary(club_id)
 
-def get_club_members(club_id: int) -> list[int]:
+def get_club_members(user_id: int, club_id: int) -> list[int]:
+    role = AjouService.get_member_role(user_id, club_id)
+    if role not in ["PRESIDENT", "VICE_PRESIDENT"]:
+        raise PermissionError("권한이 없습니다. (회장 또는 부회장만 접근 가능)") 
+
     try:
         members = get_members_by_club_id(club_id)
         if not members:
