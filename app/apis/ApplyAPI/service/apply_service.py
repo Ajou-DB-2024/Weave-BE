@@ -1,8 +1,12 @@
+from fastapi import UploadFile
+from fastapi.responses import FileResponse
 from app.apis.FormAPI.service.form_service import FormService
 from app.apis.MemberAPI.service.college_service import AjouService
 from app.apis.NotificationAPI.service.notification_service import NotificationService
 from app.apis.ApplyAPI.repository.repository import ApplyRepository
 from datetime import datetime
+
+import os
 
 class ApplyService:
     @staticmethod
@@ -284,3 +288,132 @@ class ApplyService:
             form_id=data["form_id"],
             club_id=data["club_id"]
         )
+
+    # # 파일 업로드 로직
+    # # 파일 업로드 
+    # add_file(file:UploadFile, member_info: dict):
+    #     member_id = member_info["sub"]
+    #     member_email = member_info["email"]
+    #     # ...
+    #     # submission을 통해 member 테이블을 접근하는게 아닌, 토큰 정보로부터 받는다. (토큰 정보로부터 어떻게받음?)
+    #     # file만 저장하고 file_id 반환
+
+    # # 파일과 submission/answer mapping - (지원서 작성 시 호출)
+    # map_file_to_submission(file_id:int, submission_id: int, answer_id: int)
+
+    # 파일 업로드 - 기존 버전
+    # @staticmethod
+    # async def add_file(submission_id: int, answer_id: int, file: UploadFile):
+    #     """
+    #     파일을 저장하고 관련 정보를 DB에 추가합니다.
+    #     """
+    #     # 1. member 정보 가져오기 (email, member_id)
+    #     member_info = ApplyRepository.get_member_info_by_submission(submission_id)
+    #     if not member_info:
+    #         raise ValueError(f"Submission ID {submission_id}에 대한 member 정보를 찾을 수 없습니다.")
+        
+    #     email = member_info["email"]
+    #     member_id = member_info["id"]
+
+    #     # 2. 원본 파일명 및 확장자 생성
+    #     org_filename = file.filename
+    #     org_extension = os.path.splitext(org_filename)[1].lstrip(".")
+
+    #     # 3. 저장 파일명 생성
+    #     timestamp = int(datetime.utcnow().timestamp())
+    #     save_filename = f"{timestamp}_{email.split('@')[0]}"
+    #     save_path = os.path.join("files", save_filename)
+
+    #     # 4. 파일 저장
+    #     with open(save_path, "wb") as f:
+    #         f.write(await file.read())
+
+    #     # 5. 파일 정보를 DB에 저장
+    #     file_id = ApplyRepository.add_file(save_filename, org_filename, org_extension, created_by=member_id)
+
+    #     # 6. 파일과 ANSWER 매핑
+    #     ApplyRepository.map_file_to_answer(file_id, answer_id, submission_id)
+
+    # 파일 업로드 - new_ver
+    @staticmethod
+    async def add_file(file: UploadFile, member_id, member_email):
+        """
+        파일을 저장하고 관련 정보를 DB에 추가합니다.
+        """
+        # # 1. member_info에서 member_id, email 가져오기
+        # member_id = member_info["sub"]  # JWT의 'sub'에 저장된 사용자 ID
+        # member_email = member_info["email"]
+
+        # 2. 원본 파일명 및 확장자 생성
+        org_filename = file.filename
+        org_extension = os.path.splitext(org_filename)[1].lstrip(".")
+
+        # 3. 저장 파일명 생성
+        timestamp = int(datetime.utcnow().timestamp())
+        save_filename = f"{timestamp}_{member_email.split('@')[0]}"
+        save_path = os.path.join("files", save_filename)
+
+        # 4. 파일 저장
+        with open(save_path, "wb") as f:
+            f.write(await file.read())
+
+        # 5. 파일 정보를 DB에 저장
+        file_id = ApplyRepository.add_file(
+            save_filename=save_filename,
+            org_filename=org_filename,
+            org_extension=org_extension,
+            created_by=member_id
+        )
+
+        return {"file_id": file_id, "message": "파일이 성공적으로 저장되었습니다."}
+
+
+    # 파일 다운로드
+    @staticmethod
+    def download_file(file_id: int) -> FileResponse:
+        """
+        파일 ID를 기준으로 파일을 찾아 다운로드를 처리합니다.
+        """
+        # 1. 파일 정보 조회
+        file_info = ApplyRepository.get_file_info_by_id(file_id)
+        if not file_info:
+            raise ValueError(f"File with ID {file_id} does not exist.")
+        
+        # 2. 파일 경로 확인
+        save_filename = file_info["save_filename"]
+        org_filename = file_info["org_filename"]
+        save_path = os.path.join("files", save_filename)
+        
+        if not os.path.exists(save_path):
+            raise FileNotFoundError(f"File not found at path: {save_path}")
+        
+        # 3. FileResponse로 파일 응답
+        return FileResponse(
+            path=save_path,
+            media_type="application/octet-stream",
+            filename=org_filename  # 원본 파일명으로 다운로드 제공
+        )
+    
+    @staticmethod
+    def delete_file(file_id: int):
+        """
+        파일을 삭제하고 관련 정보를 DB에서 제거합니다.
+        """
+        # 1. 파일 정보 조회
+        file_info = ApplyRepository.get_file_info_by_id(file_id)
+        if not file_info:
+            raise ValueError(f"File with ID {file_id} does not exist.")
+
+        # 2. 파일 경로 확인 및 삭제
+        save_filename = file_info["save_filename"]
+        save_path = os.path.join("files", save_filename)
+
+        if os.path.exists(save_path):
+            os.remove(save_path)  # 실제 파일 삭제
+        
+
+        # 3. answer_file에서 매핑 삭제
+        ApplyRepository.delete_answer_file_mapping(file_id)
+
+        # 4. file 테이블에서 파일 정보 삭제
+        ApplyRepository.delete_file(file_id)
