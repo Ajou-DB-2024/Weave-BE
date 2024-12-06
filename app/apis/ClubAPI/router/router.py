@@ -1,21 +1,26 @@
-from fastapi import APIRouter, Depends, File, Query, UploadFile
+from fastapi import APIRouter, Depends, File, Query, UploadFile, Request
 from typing import List, Optional
-
 from fastapi.responses import FileResponse
 from app.apis.ClubAPI.service.club_service import delete_club_file, download_club_file, find_clubs, create_new_club, get_club_members, update_club_information, get_club_brief, upload_clubdetail_file
 from app.apis.ClubAPI.Models.clubmodel import ClubDetail, ClubBriefResponse, ClubDetailEdit, MemberListResponse
-from app.apis.MemberAPI.model import Member
-from app.apis.MemberAPI.service.auth_service import WeaveAuthService
 from app.common.response.formatter import error_response, success_response
 
 router = APIRouter()
 
 @router.get("/club/members", response_model=MemberListResponse)
-async def club_members(club_id: int = Query(...), logined_user: Member = Depends(WeaveAuthService.digest_token)):
+async def club_members(request: Request, club_id: int = Query(...)):
     if not club_id:
         return error_response(error="INVALID_INPUT", message="club_id는 필수 입력입니다.")
     try:
-        members = get_club_members(logined_user.id, club_id)
+        logined_user_info = getattr(request.state, "member_info", None)
+        if not logined_user_info:
+            return error_response(error="UNAUTHORIZED", message="로그인된 사용자 정보를 찾을 수 없습니다.")
+        
+        logined_user_id = logined_user_info.get("sub")
+        if not logined_user_id:
+            return error_response(error="UNAUTHORIZED", message="사용자 ID를 확인할 수 없습니다.")
+        
+        members = get_club_members(logined_user_id, club_id)
         return success_response(data={"member_ids": members}, message="Club members retrieved successfully")
       
     except Exception as e:
@@ -33,8 +38,15 @@ async def club_brief(club_id: int):
         return error_response(error="NOT_FOUND", message=str(e))
 
 @router.patch("/club/detailedit")
-async def update_club_detail(request: ClubDetailEdit, logined_user: Member = Depends(WeaveAuthService.digest_token)):
+async def update_club_detail(login_request: Request, request: ClubDetailEdit):
     try:
+        logined_user_info = getattr(login_request.state, "member_info", None)
+        if not logined_user_info:
+            return error_response(error="UNAUTHORIZED", message="로그인된 사용자 정보를 찾을 수 없습니다.")
+        
+        logined_user_id = logined_user_info.get("sub")
+        if not logined_user_id:
+            return error_response(error="UNAUTHORIZED", message="사용자 ID를 확인할 수 없습니다.")
         update_club_information(
             request.club_id,
             request.description,
@@ -44,7 +56,7 @@ async def update_club_detail(request: ClubDetailEdit, logined_user: Member = Dep
             request.event_count,
             request.established_date,
             request.location,
-            logined_user.id
+            logined_user_id
         )
         return success_response(data=None, message="동아리 정보가 성공적으로 수정되었습니다.")
     
@@ -54,10 +66,18 @@ async def update_club_detail(request: ClubDetailEdit, logined_user: Member = Dep
         return error_response(error="FORBIDDEN", message=str(e))
 
 @router.patch("/club/detailedit/files") #file upload
-async def upload_file(club_id: int, file: UploadFile = File(...), logined_user: Member = Depends(WeaveAuthService.digest_token)):
+async def upload_file(request: Request, club_id: int, file: UploadFile = File(...)):
     try:
+        logined_user_info = getattr(request.state, "member_info", None)
+        if not logined_user_info:
+            return error_response(error="UNAUTHORIZED", message="로그인된 사용자 정보를 찾을 수 없습니다.")
+        
+        logined_user_id = logined_user_info.get("sub")
+        if not logined_user_id:
+            return error_response(error="UNAUTHORIZED", message="사용자 ID를 확인할 수 없습니다.")
+        
         # 서비스 계층으로 파일 업로드 요청 전달
-        result = await upload_clubdetail_file(file, logined_user.id, club_id)
+        result = await upload_clubdetail_file(file, logined_user_id, club_id)
         return success_response(data=result, message="파일이 성공적으로 업로드되었습니다.")
     
     except Exception as e:
@@ -66,9 +86,17 @@ async def upload_file(club_id: int, file: UploadFile = File(...), logined_user: 
         return error_response(error="FORBIDDEN", message=str(e))
 
 @router.get("/club/detailedit/{file_id}") #file download
-async def download_file(file_id: int, logined_user: Member = Depends(WeaveAuthService.digest_token)):
+async def download_file(request: Request, file_id: int):
     try:
-        file_path, original_filename = download_club_file(file_id, logined_user.id)
+        logined_user_info = getattr(request.state, "member_info", None)
+        if not logined_user_info:
+            return error_response(error="UNAUTHORIZED", message="로그인된 사용자 정보를 찾을 수 없습니다.")
+        
+        logined_user_id = logined_user_info.get("sub")
+        if not logined_user_id:
+            return error_response(error="UNAUTHORIZED", message="사용자 ID를 확인할 수 없습니다.")
+
+        file_path, original_filename = download_club_file(file_id, logined_user_id)
         return FileResponse(file_path, media_type="application/octet-stream", filename=original_filename)
     except ValueError as e:
         return error_response(error="NOT_FOUND", message=str(e))
@@ -76,9 +104,17 @@ async def download_file(file_id: int, logined_user: Member = Depends(WeaveAuthSe
         return error_response(error="SERVER_ERROR", message=str(e))
 
 @router.delete("/club/detailedit/{file_id}") #file delete
-async def delete_file(file_id: int, logined_user: Member = Depends(WeaveAuthService.digest_token)):
+async def delete_file(request: Request, file_id: int):
     try:
-        delete_club_file(file_id, logined_user.id)
+        logined_user_info = getattr(request.state, "member_info", None)
+        if not logined_user_info:
+            return error_response(error="UNAUTHORIZED", message="로그인된 사용자 정보를 찾을 수 없습니다.")
+        
+        logined_user_id = logined_user_info.get("sub")
+        if not logined_user_id:
+            return error_response(error="UNAUTHORIZED", message="사용자 ID를 확인할 수 없습니다.")
+        
+        delete_club_file(file_id, logined_user_id)
         return success_response(message="파일이 성공적으로 삭제되었습니다.")
     except ValueError as e:
         return error_response(error="INVALID_INPUT", message=str(e))
