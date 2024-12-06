@@ -76,3 +76,11 @@ DELETE_FILE_MAP = """
     DELETE FROM CLUB_DETAIL_FILE
     WHERE file_id = %s
     """
+
+GET_TAG = """
+            SELECT t.id AS tag_id, t.name AS tag_name, c.id AS category_id, c.name AS category_name
+            FROM TAG t
+            JOIN CATEGORY c ON t.category_id = c.id;
+        """
+
+CHECK_CLUB_EXIST = "SELECT * FROM CLUB WHERE id = %s"

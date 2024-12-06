@@ -1,7 +1,8 @@
-import datetime
+from datetime import datetime
 import os
-from typing import List, Optional
-from app.apis.ClubAPI.repository.repository import check_club_exists, delete_file_from_db, find_club_by_name, find_clubs_by_tags, create_club, find_file_id_by_name, get_file_info, get_members_by_club_id, map_file_to_club, save_file_to_db, unmap_file_from_club, update_club_detail, get_club_brief_summary
+from typing import Optional
+
+from app.apis.ClubAPI.repository.repository import check_club_exist_by_id, check_club_exists, delete_file_from_db, find_club_by_name, find_clubs_by_tags, create_club, find_file_id_by_name, get_file_info, get_members_by_club_id, get_tag, map_file_to_club, save_file_to_db, unmap_file_from_club, update_club_detail, get_club_brief_summary
 from app.apis.MemberAPI.service.college_service import AjouService
 
 FILES_DIR = "files"  # 파일 저장 경로
@@ -72,7 +73,7 @@ def delete_club_file(file_id: int, user_id: int):
     unmap_file_from_club(file_id)
     delete_file_from_db(file_id)
 
-def find_clubs(name: Optional[str] = None, tag_ids: Optional[List[int]] = None):
+def find_clubs(name: Optional[str] = None, tag_ids: Optional[list[int]] = None):
     
     # 동아리 이름으로 검색
     if name:
@@ -121,8 +122,21 @@ def update_club_information(club_id: int, description: Optional[str], study_coun
     #동아리 정보를 수정하는 서비스 함수.
     update_club_detail(club_id, description, study_count, award_count, edu_count, event_count, established_date, location)
 
-def get_club_brief(club_id: int) -> dict:
+def get_club_brief(club_id: int) -> dict:    
+    if not check_club_exist_by_id(club_id):
+        # 클럽이 없으면 예외 발생
+        raise ValueError(f"Club with ID {club_id} not found.")
     return get_club_brief_summary(club_id)
+
+def get_tags_by_catagory() -> list[dict]:
+    try:
+        result = get_tag()
+        if not result:
+           raise ValueError("There is no tags") 
+        return result
+    
+    except Exception as e:
+        raise ValueError(f"태그 목록을 가져오는 데 실패했습니다: {str(e)}")
 
 def get_club_members(user_id: int, club_id: int) -> list[int]:
     role = AjouService.get_member_role(user_id, club_id)
