@@ -26,6 +26,7 @@ class ClubDetailEdit(BaseModel):
     established_date: Optional[str] = None
     location: Optional[str] = None
 
+
 @dataclass
 class ClubBriefResponse(BaseModel):
     total_members: int
