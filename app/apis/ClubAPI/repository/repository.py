@@ -1,12 +1,13 @@
-from typing import List, Optional
+from collections import defaultdict
+from typing import Optional
 from app.db import run_query
 from . import query
 
-def find_club_by_name(name: str) -> List[dict]: 
+def find_club_by_name(name: str) -> list[dict]: 
     #동아리 이름으로 동아리 조회
     return run_query(query.CLUB_FINDBY_NAME, (f"%{name}%",))
 
-def find_clubs_by_tags(tag_ids: List[int]) -> List[dict]:
+def find_clubs_by_tags(tag_ids: list[int]) -> list[dict]:
     #선택된 태그들에 해당하는 동아리들을 검색
     #모든 태그를 포함하는 동아리만 반환
     
@@ -18,6 +19,16 @@ def check_club_exists(name: str) -> bool:
     #동아리 이름이 이미 존재하는지 확인
     result = run_query(query.CLUB_NAME_CHECK, (name,))
     return result[0]['COUNT(*)'] > 0
+
+def check_club_exist_by_id(club_id: int) -> bool:
+    # 실제 DB 쿼리로 클럽을 조회
+    try:
+        result = run_query(query.CHECK_CLUB_EXIST, (club_id,))
+        if result:
+            return True  # 클럽이 존재하면
+        return False  # 클럽이 없으면
+    except Exception as e:
+        raise ValueError(f"Database error occurred: {str(e)}")
 
 def create_club(name: str, club_depart: str, club_type: str, president_id: int) -> dict:
     #동아리 추가
@@ -89,3 +100,26 @@ def delete_file_from_db(file_id: int):
     
 def unmap_file_from_club(file_id: int):
     run_query(query.DELETE_FILE_MAP, (file_id))
+
+def get_tag() -> list[dict]:
+    try:
+        result = run_query(query.GET_TAG)
+        categories = defaultdict(list)
+    
+            # 카테고리별로 태그를 묶음
+        for row in result:
+            categories[row['category_id']].append({
+                "id": row['tag_id'],
+                "name": row['tag_name']
+            })
+        
+        # 카테고리별로 태그 목록을 묶은 리스트 반환
+        return [{
+            "category": {
+                "id": category_id, 
+                "text": result[0]['category_name']  # category_name은 result[0]에서 참조
+            }, 
+            "selections": tags
+        } for category_id, tags in categories.items()]
+    except Exception as e:
+        raise ValueError(f"태그 목록을 가져오는 데 실패했습니다: {str(e)}")

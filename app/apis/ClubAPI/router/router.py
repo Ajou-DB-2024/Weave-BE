@@ -1,13 +1,23 @@
-from fastapi import APIRouter, Depends, File, Query, UploadFile, Request
-from typing import List, Optional
+from fastapi import APIRouter, File, Query, UploadFile, Request
+from typing import Optional
 from fastapi.responses import FileResponse
-from app.apis.ClubAPI.service.club_service import delete_club_file, download_club_file, find_clubs, create_new_club, get_club_members, update_club_information, get_club_brief, upload_clubdetail_file
-from app.apis.ClubAPI.Models.clubmodel import ClubDetail, ClubBriefResponse, ClubDetailEdit, MemberListResponse
+from app.apis.ClubAPI.service.club_service import delete_club_file, download_club_file, find_clubs, create_new_club, get_club_members, get_tags_by_catagory, update_club_information, get_club_brief, upload_clubdetail_file
+from app.apis.ClubAPI.Models.clubmodel import ClubDetail, ClubDetailEdit
 from app.common.response.formatter import error_response, success_response
 
 router = APIRouter()
 
-@router.get("/club/members", response_model=MemberListResponse)
+@router.get("/club/tags")
+async def get_tag_list():
+    try:
+        # 태그 목록을 서비스에서 가져옵니다.
+        tags = get_tags_by_catagory()
+        # 성공 응답으로 태그 목록 반환
+        return success_response(data=tags, message="태그 목록이 성공적으로 조회되었습니다.")
+    except Exception as e:
+        return error_response(error="SERVER_ERROR", message=str(e))
+
+@router.get("/club/members")
 async def club_members(request: Request, club_id: int = Query(...)):
     if not club_id:
         return error_response(error="INVALID_INPUT", message="club_id는 필수 입력입니다.")
@@ -28,7 +38,7 @@ async def club_members(request: Request, club_id: int = Query(...)):
     except PermissionError as e:
         return error_response(error="FORBIDDEN", message=str(e))
 
-@router.get("/club/brief", response_model=ClubBriefResponse)
+@router.get("/club/brief")
 async def club_brief(club_id: int):
     try:
         result = get_club_brief(club_id)
@@ -140,7 +150,7 @@ async def create_club(request: ClubDetail):  # 동아리 추가
 @router.get("/club/find")
 def get_club(
     club_name: Optional[str] = None, 
-    tag_ids: Optional[List[int]] = Query([], alias="tag_id")  # 여러 개의 태그 ID
+    tag_ids: Optional[list[int]] = Query([], alias="tag_id")  # 여러 개의 태그 ID
 ):  
     try:
         result = find_clubs(name=club_name, tag_ids=tag_ids)
