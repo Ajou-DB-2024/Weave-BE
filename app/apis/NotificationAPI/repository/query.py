@@ -66,3 +66,9 @@ WHERE s.recruit_id = %s;
 DUPLICATE_CHECK = """
 SELECT COUNT(*) AS cnt FROM NOTIFICATION_MAP WHERE member_id = %s AND notification_id = %s
 """
+
+
+
+GET_MAX_ID = """
+SELECT MAX(id) AS id FROM NOTIFICATION;
+"""
