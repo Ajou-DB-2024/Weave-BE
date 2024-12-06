@@ -18,6 +18,12 @@ INSERT INTO ANSWER (submission_id, question_id, value)
 VALUES (%s, %s, %s);
 """
 
+SELECT_ANSWER = """
+SELECT id
+FROM ANSWER
+WHERE submission_id = %s AND question_id = %s;
+"""
+
 GET_SUBMISSION_ID = """
 SELECT id AS submission_id
 FROM SUBMISSION

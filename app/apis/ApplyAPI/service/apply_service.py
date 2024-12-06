@@ -31,7 +31,7 @@ class ApplyService:
         return recruits
     
     @staticmethod
-    def save_submission(data: dict) -> dict:
+    def save_submission(data: dict, member_id: int) -> dict:
         """
         지원서를 저장합니다.
         """
@@ -43,7 +43,7 @@ class ApplyService:
         # 2. SUBMISSION 데이터 저장
         submission_id = ApplyRepository.insert_submission(
             recruit_id=data["recruit_id"],
-            member_id=data["member_id"],
+            member_id=member_id,
             form_id=form_data["form_id"],
             title=data["submission_title"]
         )
@@ -53,21 +53,15 @@ class ApplyService:
         # 3. FORM의 질문 데이터 기반으로 ANSWER 및 ANSWER_FILE 저장
         for answer_content in data["answer_content"]:
             # ANSWER 저장
-            answer_id = ApplyRepository.insert_answer(
+            ApplyRepository.insert_answer(
                 submission_id=submission_id,
                 question_id=answer_content["question_id"],
-                value=answer_content.get("value", "")
+                value=answer_content["value"]
             )
-            
+            answer_id = ApplyRepository.get_answer_id(submission_id, answer_content["question_id"])
             # ANSWER_FILE 저장 (파일이 있는 경우)
             if answer_content.get("file_id"):
-                ApplyRepository.link_file_to_answer(
-                    answer_id=answer_id,
-                    submission_id=submission_id,
-                    file_id=answer_content["file_id"]
-                )
-
-                ApplyService.map_file_to_answer(answer_content["file_id"], answer_id, submission_id)
+                ApplyRepository.map_file_to_answer(answer_content["file_id"], answer_id, submission_id)
 
         return {"submission_id": submission_id}
     
@@ -372,10 +366,3 @@ class ApplyService:
 
         # 4. file 테이블에서 파일 정보 삭제
         ApplyRepository.delete_file(file_id)
-
-    @staticmethod
-    def map_file_to_answer(file_id: int, answer_id: int, submission_id: int):
-        """
-        파일을 Submission/Answer와 매핑합니다.
-        """
-        ApplyRepository.map_file_to_answer(file_id, answer_id, submission_id)
