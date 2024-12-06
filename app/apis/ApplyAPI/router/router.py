@@ -29,17 +29,19 @@ async def search_recruit(data: RecruitSearchRequest):
         )
     
 @router.post("/apply/submission/save")
-async def save_submission(data: SubmissionSave):
+async def save_submission(data: SubmissionSave, request: Request):
     """
     지원서를 임시 저장합니다.
     """
     try:
+        member_info = request.state.member_info
+        member_id = member_info.get("sub")
         # 지원서 저장 서비스 호출
-        result = ApplyService.save_submission(data.dict())
+        result = ApplyService.save_submission(data.dict(), member_id)
         
         # 저장 성공 시 메시지와 리다이렉트 URL 반환
         response_data = {
-            "message": "지원서가 저장되었습니다.",
+            "message": "지원서가 임시 저장되었습니다.",
             "redirect_url": "/apply/submission",  # 리다이렉트 URL 설정
             "submission_id": result["submission_id"],  # 저장된 ID 반환
         }
@@ -301,20 +303,5 @@ async def delete_file(file_id: int):
     try:
         ApplyService.delete_file(file_id)
         return success_response(message="파일이 성공적으로 삭제되었습니다.")
-    except Exception as e:
-        return error_response(error="INTERNAL_SERVER_ERROR", message=str(e))
-    
-@router.post("/apply/file/map")
-async def map_file_to_answer(
-    file_id: int,
-    answer_id: int,
-    submission_id: int
-    ):
-    """
-    파일을 Submission/Answer와 매핑합니다.
-    """
-    try:
-        ApplyService.map_file_to_answer(file_id, answer_id, submission_id)
-        return success_response(message="파일이 성공적으로 매핑되었습니다.")
     except Exception as e:
         return error_response(error="INTERNAL_SERVER_ERROR", message=str(e))

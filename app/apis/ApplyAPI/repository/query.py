@@ -18,6 +18,12 @@ INSERT INTO ANSWER (submission_id, question_id, value)
 VALUES (%s, %s, %s);
 """
 
+SELECT_ANSWER = """
+SELECT id
+FROM ANSWER
+WHERE submission_id = %s AND question_id = %s;
+"""
+
 GET_SUBMISSION_ID = """
 SELECT id AS submission_id
 FROM SUBMISSION
@@ -130,8 +136,8 @@ GROUP BY R.end_date
 """
 
 INSERT_RECRUIT = """
-INSERT INTO RECRUIT (name, start_date, end_date, form_id, status)
-VALUES (%s, %s, %s, %s, 'OPEN');
+INSERT INTO RECRUIT (name, start_date, end_date, form_id, club_id, status)
+VALUES (%s, %s, %s, %s, %s, 'OPEN');
 """
 
 GET_CLUB_ID_FROM_RECRUIT = """
