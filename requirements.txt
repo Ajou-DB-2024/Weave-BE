@@ -11,3 +11,5 @@ passlib
 
 google
 google_auth_oauthlib
+
+python-multipart

@@ -1,9 +1,9 @@
-from typing import List, Optional
+from typing import Optional
 from pydantic import BaseModel
 from dataclasses import dataclass
 
 class MemberListResponse(BaseModel):
-    member_ids: List[int]
+    member_ids: list[int]
 
     class Config:
         orm_mode = True
@@ -25,8 +25,3 @@ class ClubDetailEdit(BaseModel):
     event_count: Optional[int] = None
     established_date: Optional[str] = None
     location: Optional[str] = None
-
-@dataclass
-class ClubBriefResponse(BaseModel):
-    total_members: int
-    total_submissions: int

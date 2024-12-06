@@ -8,5 +8,4 @@ class Question(BaseModel):
 
 class FormCreate(BaseModel):
     title: str
-    created_by: int
     questions: List[Question]

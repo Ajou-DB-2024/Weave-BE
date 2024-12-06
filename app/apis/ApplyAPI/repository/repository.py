@@ -1,6 +1,8 @@
 from app.db import run_query
 from datetime import datetime
-from app.apis.ApplyAPI.repository.query import SEARCH_RECRUIT, INSERT_SUBMISSION, INSERT_ANSWER, GET_SUBMISSION_ID, SELECT_QUESTION_ANSWERS, SELECT_SUBMISSION_LIST, UPDATE_SUBMISSION_STATUS, GET_ADMISSION_LIST, GET_ADMISSION_RESULT, UPDATE_SUBMISSION_RESULT, GET_CLUB_ID_FROM_RECRUIT, UPDATE_ANNOUNCEMENT_STATUS, UPDATE_RECRUIT_END_DATE, SELECT_RECRUIT_DETAIL, SELECT_RECRUIT_LIST, GET_RECRUIT_STATUS, INSERT_RECRUIT, LINK_FILE_TO_ANSWER
+
+from app.apis.ApplyAPI.repository.query import SEARCH_RECRUIT, INSERT_SUBMISSION, INSERT_ANSWER, GET_SUBMISSION_ID, SELECT_QUESTION_ANSWERS, SELECT_SUBMISSION_LIST, UPDATE_SUBMISSION_STATUS, GET_ADMISSION_LIST, GET_ADMISSION_RESULT, UPDATE_SUBMISSION_RESULT, GET_CLUB_ID_FROM_RECRUIT, UPDATE_ANNOUNCEMENT_STATUS, UPDATE_RECRUIT_END_DATE, SELECT_RECRUIT_DETAIL, SELECT_RECRUIT_LIST, GET_RECRUIT_STATUS, INSERT_RECRUIT, INSERT_FILE, GET_LAST_INSERTED_FILE_ID, INSERT_ANSWER_FILE, GET_FILE_INFO_BY_ID, GET_FILE_INFO_BY_ID, DELETE_ANSWER_FILE, DELETE_FILE, GET_FILE_INFO_BY_ID, SELECT_ANSWER
+
 
 class ApplyRepository:
     @staticmethod
@@ -43,6 +45,14 @@ class ApplyRepository:
         ANSWER 데이터를 삽입합니다.
         """
         run_query(INSERT_ANSWER, (submission_id, question_id, value))
+    
+    @staticmethod
+    def get_answer_id(submission_id: int, question_id: int) -> int:
+        """
+        submission_id와 question_id로 answer_id를 조회합니다.
+        """
+        result = run_query(SELECT_ANSWER, (submission_id, question_id))
+        return result[0]["id"] if result else None
     
     @staticmethod
     def get_question_answers(submission_id: int):
@@ -154,15 +164,63 @@ class ApplyRepository:
             raise Exception(f"Database error: {e}")
         
     @staticmethod
-    def create_recruit(recruit_name: str, recruit_start_date: str, recruit_end_date: str, form_id: int):
+    def create_recruit(recruit_name: str, recruit_start_date: str, recruit_end_date: str, form_id: int, club_id: int):
         try:
-            run_query(INSERT_RECRUIT, (recruit_name, recruit_start_date, recruit_end_date, form_id))
+            run_query(INSERT_RECRUIT, (recruit_name, recruit_start_date, recruit_end_date, form_id, club_id))
         except Exception as e:
             raise Exception(f"Database error: {e}")
         
+
+    # 파일 업로드  
     @staticmethod
-    def link_file_to_answer(answer_id: int, submission_id: int, file_id: int):
+    def add_file(save_filename: str, org_filename: str, org_extension: str, created_by: int) -> int:
         """
-        ANSWER_FILE 테이블에 파일 연결 정보를 추가합니다.
+        파일 정보를 DB에 추가하고 생성된 file_id를 반환합니다.
         """
-        run_query(LINK_FILE_TO_ANSWER, (answer_id, submission_id, file_id))
+        run_query(INSERT_FILE, (save_filename, org_filename, org_extension, created_by))
+        result = run_query(GET_LAST_INSERTED_FILE_ID)
+        return result[0]["id"] if result else None
+    
+
+        
+        
+    @staticmethod
+    def map_file_to_answer(file_id: int, answer_id: int, submission_id: int):
+        """
+        파일과 ANSWER 매핑 정보를 저장합니다.
+        """
+        run_query(INSERT_ANSWER_FILE, (file_id, answer_id, submission_id))
+
+    
+  
+    # 파일 다운로드 - 기존_ver
+    @staticmethod
+    def get_file_info_by_id(file_id: int) -> dict:
+        """
+        파일 ID를 기준으로 저장된 파일 정보를 가져옵니다.
+        """
+        result = run_query(GET_FILE_INFO_BY_ID, (file_id,))
+        return result[0] if result else None
+    
+    
+    @staticmethod
+    def delete_answer_file_mapping(file_id: int):
+        """
+        answer_file 테이블에서 해당 file_id의 매핑을 삭제합니다.
+        """
+        run_query(DELETE_ANSWER_FILE, (file_id,))
+
+    @staticmethod
+    def delete_file(file_id: int):
+        """
+        file 테이블에서 해당 file_id의 파일 정보를 삭제합니다.
+        """
+        run_query(DELETE_FILE, (file_id,))
+
+    @staticmethod
+    def get_file_info_by_id(file_id: int) -> dict:
+        """
+        file_id를 기준으로 저장된 파일 경로를 가져옵니다.
+        """
+        result = run_query(GET_FILE_INFO_BY_ID, (file_id,))
+        return result[0] if result else None
