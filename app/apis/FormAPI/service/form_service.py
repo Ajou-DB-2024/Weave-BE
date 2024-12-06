@@ -3,11 +3,11 @@ from datetime import datetime
 
 class FormService:
     @staticmethod
-    def create_form(data: dict) -> dict:
+    def create_form(data: dict, member_id: int) -> dict:
 
         # FORM 데이터 생성
         form_id = FormRepository.create_form(
-            created_by=data["created_by"],  # 테스트용 사용자 ID
+            created_by=member_id,
             title=data["title"],
         )
 

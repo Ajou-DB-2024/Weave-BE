@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Request
 from app.apis.FormAPI.service.form_service import FormService
 from app.apis.FormAPI.model.FormCreate import FormCreate
 from app.common.response.formatter import success_response, error_response
@@ -7,14 +7,16 @@ from app.common.response.formatter import success_response, error_response
 router = APIRouter()
 
 @router.post("/form/create/")
-async def create_form(data: FormCreate):
+async def create_form(data: FormCreate, request: Request):
     """
     클라이언트에서 전송된 폼 데이터를 기반으로 FORM을 생성합니다.
     """
     
     try:
+        member_info = request.state.member_info
+        member_id = member_info["sub"]
         # 요청 데이터 검증 및 서비스 호출
-        result = FormService.create_form(data.dict())
+        result = FormService.create_form(data.dict(), member_id)
         return success_response(data=result)
     except ValueError as ve:
         # 값 검증 관련 예외 처리
