@@ -140,6 +140,9 @@ FROM RECRUIT
 WHERE id = %s
 """
 
+
+
+
 # 파일 정보를 저장
 INSERT_FILE = """
 INSERT INTO FILE (save_filename, org_filename, org_extension, created_by)
@@ -152,25 +155,10 @@ INSERT INTO ANSWER_FILE (file_id, answer_id, submission_id)
 VALUES (%s, %s, %s)
 """
 
-# 특정 submission_id에서 member email 가져오기
-# GET_EMAIL_BY_SUBMISSION = """
-# SELECT email
-# FROM MEMBER
-# JOIN SUBMISSION ON member.id = SUBMISSION.member_id
-# WHERE SUBMISSION.id = %s;
-# """
-
 # 방금 삽입된 AUTO_INCREMENT ID 가져오기
 GET_LAST_INSERTED_FILE_ID = """
 SELECT MAX(id) AS id FROM FILE;
 """
-
-# GET_MEMBER_INFO_BY_SUBMISSION = """
-# SELECT m.id AS id, m.email AS email
-# FROM SUBMISSION s
-# JOIN MEMBER m ON s.member_id = m.id
-# WHERE s.id = %s
-# """
 
 # 특정 파일 정보 가져오기
 GET_FILE_INFO_BY_ID = """
@@ -197,4 +185,3 @@ SELECT save_filename
 FROM FILE
 WHERE id = %s;
 """
-

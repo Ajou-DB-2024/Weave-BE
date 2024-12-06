@@ -52,3 +52,27 @@ GET_ROLE_BY_CLUBID = """
     FROM BELONGING 
     WHERE member_id = %s AND club_id = %s
     """
+
+FILE_UPLOAD = """
+            INSERT INTO FILE (save_filename, org_filename, org_extension, created_by)
+            VALUES (%s, %s, %s, %s);
+        """
+
+GET_FILE_INFO = "SELECT save_filename, org_filename, org_extension, created_by FROM FILE WHERE id = %s;"
+
+DELETE_FILE = "DELETE FROM FILE WHERE id = %s;"
+
+GET_FILEID_BYFILENAME = """
+    SELECT id FROM FILE
+    WHERE save_filename = %s
+    """
+
+MAP_FILE_CLUB = """
+    INSERT INTO CLUB_DETAIL_FILE (file_id, club_id)
+    VALUES (%s, %s)
+    """
+
+DELETE_FILE_MAP = """
+    DELETE FROM CLUB_DETAIL_FILE
+    WHERE file_id = %s
+    """

@@ -41,7 +41,8 @@ async def save_submission(data: SubmissionSave):
         # 저장 성공 시 메시지와 리다이렉트 URL 반환
         response_data = {
             "message": "지원서가 저장되었습니다.",
-            "redirect_url": "/apply/submission"  # 리다이렉트 URL 설정
+            "redirect_url": "/apply/submission",  # 리다이렉트 URL 설정
+            "submission_id": result["submission_id"],  # 저장된 ID 반환
         }
         return success_response(data=response_data)
     except Exception as e:

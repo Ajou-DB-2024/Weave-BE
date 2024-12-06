@@ -47,14 +47,25 @@ class ApplyService:
             form_id=form_data["form_id"],
             title=data["submission_title"]
         )
+        if not submission_id:
+            raise Exception("Failed to save submission.")
         
-        # 3. FORM의 질문 데이터 기반으로 ANSWER 저장
-        for question, answer_content in zip(form_data["questions"], data["answer_content"]):
-            ApplyRepository.insert_answer(
+        # 3. FORM의 질문 데이터 기반으로 ANSWER 및 ANSWER_FILE 저장
+        for answer_content in data["answer_content"]:
+            # ANSWER 저장
+            answer_id = ApplyRepository.insert_answer(
                 submission_id=submission_id,
-                question_id=question["question_id"],  # 질문 ID 추가
-                value=answer_content or ""  # 답변이 없으면 빈 값으로 저장
+                question_id=answer_content["question_id"],
+                value=answer_content.get("value", "")
             )
+            
+            # ANSWER_FILE 저장 (파일이 있는 경우)
+            if answer_content.get("file_id"):
+                ApplyRepository.link_file_to_answer(
+                    answer_id=answer_id,
+                    submission_id=submission_id,
+                    file_id=answer_content["file_id"]
+                )
 
         return {"submission_id": submission_id}
     

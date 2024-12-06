@@ -5,6 +5,9 @@ from fastapi.security import OAuth2PasswordBearer
 
 from app.apis.MemberAPI.model.GoogleToken import GoogleOAuthToken
 
+from app.common.utils.jwt_decode import decode_jwt_token
+
+
 from .college_service import AjouService
 from ..repository import repository as MemberRepository
 
@@ -180,21 +183,23 @@ class WeaveAuthService:
 
     return encoded_jwt
 
+  @staticmethod
   def authorize_token(token: str):
+    """
+    JWT 토큰 검증 및 멤버 ID 추출.
+    """
     try:
-      payload = jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
-
-      if not check_jwt_format(payload):
-        raise Exception("Invalid JWT Format")
-      
-      return {
-        "result": True,
-        "member_id": payload.get('sub')
-      }
-    except Exception as e:
-        print(e)
+        payload = decode_jwt_token(token)  # 유틸리티 함수 사용
+        if "sub" not in payload:
+            raise Exception("Invalid JWT format: 'sub' not found")
         return {
-          "result": False
+            "result": True,
+            "member_id": payload["sub"]
+        }
+    except HTTPException as e:
+        return {
+            "result": False,
+            "error": e.detail
         }
 
   def digest_token(token: str = Depends(oauth2_scheme)) -> Member.Member | None:
