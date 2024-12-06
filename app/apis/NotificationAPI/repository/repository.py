@@ -10,7 +10,8 @@ from app.apis.NotificationAPI.repository.query import (
     GET_ALL_MEMBER_IDS,
     GET_RECRUITS_WITH_ONE_DAY_LEFT,
     GET_MEMBER_IDS_BY_RECRUIT_ID_ALL_SUBMISSION,
-    DUPLICATE_CHECK
+    DUPLICATE_CHECK,
+    GET_MAX_ID
 )
 
 class NotificationRepository:
@@ -52,7 +53,7 @@ class NotificationRepository:
         알림을 생성하고 생성된 알림 ID를 반환합니다.
         """
         run_query(INSERT_NOTIFICATION, (notification_type, title, content))
-        result = run_query("SELECT MAX(id) AS id FROM notification;")  # 마지막 삽입된 ID 확인
+        result = run_query(GET_MAX_ID)  # 마지막 삽입된 ID 확인
         return result[0]["id"] if result else None
  
     @staticmethod
@@ -100,5 +101,3 @@ class NotificationRepository:
         return result
 
     
-
-
