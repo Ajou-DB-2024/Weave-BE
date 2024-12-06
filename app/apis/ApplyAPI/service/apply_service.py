@@ -1,7 +1,7 @@
 from app.apis.FormAPI.service.form_service import FormService
-# from app.apis.NotificationAPI.service.notification_service import NotificationService
-from app.apis.ApplyAPI.repository.repository import ApplyRepository
 from app.apis.MemberAPI.service.college_service import AjouService
+from app.apis.NotificationAPI.service.notification_service import NotificationService
+from app.apis.ApplyAPI.repository.repository import ApplyRepository
 from datetime import datetime
 
 class ApplyService:
@@ -43,14 +43,25 @@ class ApplyService:
             form_id=form_data["form_id"],
             title=data["submission_title"]
         )
+        if not submission_id:
+            raise Exception("Failed to save submission.")
         
-        # 3. FORM의 질문 데이터 기반으로 ANSWER 저장
-        for question, answer_content in zip(form_data["questions"], data["answer_content"]):
-            ApplyRepository.insert_answer(
+        # 3. FORM의 질문 데이터 기반으로 ANSWER 및 ANSWER_FILE 저장
+        for answer_content in data["answer_content"]:
+            # ANSWER 저장
+            answer_id = ApplyRepository.insert_answer(
                 submission_id=submission_id,
-                question_id=question["question_id"],  # 질문 ID 추가
-                value=answer_content or ""  # 답변이 없으면 빈 값으로 저장
+                question_id=answer_content["question_id"],
+                value=answer_content.get("value", "")
             )
+            
+            # ANSWER_FILE 저장 (파일이 있는 경우)
+            if answer_content.get("file_id"):
+                ApplyRepository.link_file_to_answer(
+                    answer_id=answer_id,
+                    submission_id=submission_id,
+                    file_id=answer_content["file_id"]
+                )
 
         return {"submission_id": submission_id}
     
@@ -114,31 +125,50 @@ class ApplyService:
 
         return {"submission_id": submission_id, "status": status}
     
-    """
+
     @staticmethod
-    def open_recruit_result(recruit_id: int):
-        # Step 1. 결과 발표 상태 업데이트
-        is_updated = ApplyRepository.update_recruit_announcement_status(recruit_id)
-        if not is_updated:
+    def open_recruit_result(member_id: int, recruit_id: int):
+        """
+        모집 결과를 발표합니다.
+        """
+        # Step 1. recruit_id로 club_id 조회
+        club_id = ApplyRepository.get_club_id_from_recruit(recruit_id)
+        if not club_id:
+            raise ValueError("Invalid recruit_id. Club not found.")
+
+        # Step 2. 임원진 권한 확인
+        role = AjouService.get_member_role(member_id, club_id)
+        if role not in ["PRESIDENT", "VICE_PRESIDENT", "EXECUTIVE"]:
+            raise PermissionError("You do not have permission to open recruit results.")
+
+        # Step 3. 결과 발표 상태 업데이트
+        is_announced = ApplyRepository.update_recruit_announcement_status(recruit_id)
+        if not is_announced:
             raise ValueError("Failed to update announcement status for the given recruit_id.")
 
-        # Step 2. Notification 호출
-        notification_data = {
-            "recruit_id": recruit_id,
-            "message": "지원 결과가 발표되었습니다."
-        }
-        NotificationService.create_notification(notification_data)
+        # Step 4. Notification 호출
+        NotificationService.create_result_notifications(recruit_id)
 
         return {
-            "message": "결과 발표가 완료되었습니다.",
+            "message": "NotificationAPI로 결과 발표 알림이 전송되었습니다.",
             "redirect_url": "/apply/recruit/result"
         }
-    """
+
 
     @staticmethod
-    def update_deadline(data: dict) -> dict:
+    def update_deadline(data: dict, member_id: int) -> dict:
         recruit_id = data["recruit_id"]
         end_date = data["end_date"]
+
+        # Step 1. recruit_id로 club_id 조회
+        club_id = ApplyRepository.get_club_id_from_recruit(recruit_id)
+        if not club_id:
+            raise ValueError("Invalid recruit_id. Club not found.")
+
+        # Step 2. 임원진 권한 확인
+        role = AjouService.get_member_role(member_id, club_id)
+        if role not in ["PRESIDENT", "VICE_PRESIDENT", "EXECUTIVE"]:
+            raise PermissionError("You do not have permission.")
 
         if not end_date:
             # 즉시 종료 처리
@@ -155,20 +185,34 @@ class ApplyService:
         }
     
     @staticmethod
-    def get_recruit_detail(data: dict):
+    def get_recruit_detail(data: dict, member_id: int):
         recruit_id = data.get("recruit_id")
         if not recruit_id:
             raise ValueError("recruit_id is required")
+        
+         # Step 1. recruit_id로 club_id 조회
+        club_id = ApplyRepository.get_club_id_from_recruit(recruit_id)
+        if not club_id:
+            raise ValueError("Invalid recruit_id. Club not found.")
+
+        # Step 2. 임원진 권한 확인
+        role = AjouService.get_member_role(member_id, club_id)
+        if role not in ["PRESIDENT", "VICE_PRESIDENT", "EXECUTIVE"]:
+            raise PermissionError("You do not have permission.")
         
         # Repository 호출
         recruit_detail = ApplyRepository.get_recruit_detail(recruit_id)
         return recruit_detail
     
     @staticmethod
-    def get_recruit_list(data: dict):
+    def get_recruit_list(data: dict, member_id: int):
         club_id = data.get("club_id")
         if not club_id:
             raise Exception("club_id is required")
+        
+        role = AjouService.get_member_role(member_id, club_id)
+        if role not in ["PRESIDENT", "VICE_PRESIDENT", "EXECUTIVE"]:
+            raise PermissionError("You do not have permission.")
         
         recruit_list = ApplyRepository.get_recruit_list(club_id)
         if not recruit_list:
@@ -177,10 +221,20 @@ class ApplyService:
         return recruit_list
     
     @staticmethod
-    def get_recruit_status(data: dict):
+    def get_recruit_status(data: dict, member_id: int):
         recruit_id = data.get("recruit_id")
         if not recruit_id:
             raise Exception("recruit_id is required")
+        
+        # Step 1. recruit_id로 club_id 조회
+        club_id = ApplyRepository.get_club_id_from_recruit(recruit_id)
+        if not club_id:
+            raise ValueError("Invalid recruit_id. Club not found.")
+
+        # Step 2. 임원진 권한 확인
+        role = AjouService.get_member_role(member_id, club_id)
+        if role not in ["PRESIDENT", "VICE_PRESIDENT", "EXECUTIVE"]:
+            raise PermissionError("You do not have permission.")
         
         # 데이터베이스 조회
         recruit_data = ApplyRepository.get_recruit_status(recruit_id)
@@ -203,10 +257,15 @@ class ApplyService:
         }
     
     @staticmethod
-    def create_recruit(data: dict):
+    def create_recruit(data: dict, member_id: int):
         """
         리크루팅 생성 로직
         """
+        club_id = data.get("club_id")        
+        role = AjouService.get_member_role(member_id, club_id)
+        if role not in ["PRESIDENT", "VICE_PRESIDENT", "EXECUTIVE"]:
+            raise PermissionError("You do not have permission.")
+        
         # FormService를 호출해 해당 클럽의 폼 목록을 가져옴
         forms = FormService.get_forms(data["club_id"])
         if not forms:

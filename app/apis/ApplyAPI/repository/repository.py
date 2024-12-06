@@ -1,6 +1,6 @@
 from app.db import run_query
 from datetime import datetime
-from app.apis.ApplyAPI.repository.query import SEARCH_RECRUIT, INSERT_SUBMISSION, INSERT_ANSWER, GET_SUBMISSION_ID, SELECT_QUESTION_ANSWERS, SELECT_SUBMISSION_LIST, UPDATE_SUBMISSION_STATUS, GET_ADMISSION_LIST, GET_ADMISSION_RESULT, UPDATE_SUBMISSION_RESULT, GET_CLUB_ID_FROM_RECRUIT, UPDATE_ANNOUNCEMENT_STATUS, UPDATE_RECRUIT_END_DATE, SELECT_RECRUIT_DETAIL, SELECT_RECRUIT_LIST, GET_RECRUIT_STATUS, INSERT_RECRUIT
+from app.apis.ApplyAPI.repository.query import SEARCH_RECRUIT, INSERT_SUBMISSION, INSERT_ANSWER, GET_SUBMISSION_ID, SELECT_QUESTION_ANSWERS, SELECT_SUBMISSION_LIST, UPDATE_SUBMISSION_STATUS, GET_ADMISSION_LIST, GET_ADMISSION_RESULT, UPDATE_SUBMISSION_RESULT, GET_CLUB_ID_FROM_RECRUIT, UPDATE_ANNOUNCEMENT_STATUS, UPDATE_RECRUIT_END_DATE, SELECT_RECRUIT_DETAIL, SELECT_RECRUIT_LIST, GET_RECRUIT_STATUS, INSERT_RECRUIT, LINK_FILE_TO_ANSWER
 
 class ApplyRepository:
     @staticmethod
@@ -110,15 +110,18 @@ class ApplyRepository:
         result = run_query(GET_CLUB_ID_FROM_RECRUIT, (recruit_id,))
         return result[0]["club_id"] if result else None
 
-    """
+
     @staticmethod
     def update_recruit_announcement_status(recruit_id: int) -> bool:
+        """
+        주어진 recruit_id에 해당하는 모든 submission의 is_announced 상태를 TRUE로 업데이트합니다.
+        """
         try:
-            result = run_query(UPDATE_ANNOUNCEMENT_STATUS, (recruit_id,))
-            return True if result else False
+            run_query(UPDATE_ANNOUNCEMENT_STATUS, (recruit_id,))
+            return True
         except Exception as e:
             raise Exception(f"Database error: {e}")
-    """
+
        
     @staticmethod
     def update_recruit_end_date(recruit_id: int, end_date: datetime):
@@ -156,3 +159,10 @@ class ApplyRepository:
             run_query(INSERT_RECRUIT, (recruit_name, recruit_start_date, recruit_end_date, form_id))
         except Exception as e:
             raise Exception(f"Database error: {e}")
+        
+    @staticmethod
+    def link_file_to_answer(answer_id: int, submission_id: int, file_id: int):
+        """
+        ANSWER_FILE 테이블에 파일 연결 정보를 추가합니다.
+        """
+        run_query(LINK_FILE_TO_ANSWER, (answer_id, submission_id, file_id))

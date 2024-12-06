@@ -82,9 +82,9 @@ WHERE id = %s;
 """
 
 UPDATE_ANNOUNCEMENT_STATUS = """
-UPDATE RECRUIT
+UPDATE SUBMISSION
 SET is_announced = TRUE
-WHERE id = %s;
+WHERE recruit_id = %s;
 """
 
 UPDATE_RECRUIT_END_DATE = """
@@ -138,4 +138,9 @@ GET_CLUB_ID_FROM_RECRUIT = """
 SELECT club_id
 FROM RECRUIT
 WHERE id = %s
+"""
+
+LINK_FILE_TO_ANSWER = """
+INSERT INTO ANSWER_FILE (answer_id, submission_id, file_id)
+VALUES (%s, %s, %s)
 """
