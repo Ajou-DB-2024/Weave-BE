@@ -277,10 +277,10 @@ class ApplyService:
             raise ValueError("선택된 폼 ID가 유효하지 않습니다.")
 
         # 리크루팅 데이터 삽입
-        ApplyRepository.insert_recruit(
-            name=data["recruit_name"],
-            start_date=data["recruit_start_date"],
-            end_date=data["recruit_end_date"],
+        ApplyRepository.create_recruit(
+            recruit_name=data["recruit_name"],
+            recruit_start_date=data["recruit_start_date"],
+            recruit_end_date=data["recruit_end_date"],
             form_id=data["form_id"],
             club_id=data["club_id"]
         )

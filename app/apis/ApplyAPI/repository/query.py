@@ -136,8 +136,8 @@ GROUP BY R.end_date
 """
 
 INSERT_RECRUIT = """
-INSERT INTO RECRUIT (name, start_date, end_date, form_id, status)
-VALUES (%s, %s, %s, %s, 'OPEN');
+INSERT INTO RECRUIT (name, start_date, end_date, form_id, club_id, status)
+VALUES (%s, %s, %s, %s, %s, 'OPEN');
 """
 
 GET_CLUB_ID_FROM_RECRUIT = """
