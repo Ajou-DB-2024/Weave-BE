@@ -166,10 +166,8 @@ class ApplyRepository:
         """
         파일 정보를 DB에 추가하고 생성된 file_id를 반환합니다.
         """
-        print(f"[DEBUG] Executing INSERT_FILE with: {save_filename}, {org_filename}, {org_extension}, {created_by}")
         run_query(INSERT_FILE, (save_filename, org_filename, org_extension, created_by))
         result = run_query(GET_LAST_INSERTED_FILE_ID)
-        print(f"[DEBUG] Last inserted file ID result: {result}")
         return result[0]["id"] if result else None
         
         

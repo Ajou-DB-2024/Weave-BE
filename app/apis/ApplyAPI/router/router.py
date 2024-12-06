@@ -266,7 +266,6 @@ async def add_file(submission_id: int, answer_id: int, file: UploadFile):
         await ApplyService.add_file(submission_id=submission_id, answer_id=answer_id, file=file)
         return success_response(message="파일이 성공적으로 업로드되었습니다.")
     except Exception as e:
-        print(f"Error occurred while adding file: {e}")
         return error_response(error="INTERNAL_SERVER_ERROR", message=str(e))
 
 
@@ -278,13 +277,10 @@ async def download_file(file_id: int):
     try:
         return ApplyService.download_file(file_id)
     except ValueError as ve:
-        print(f"Error: {ve}")
         raise HTTPException(status_code=404, detail=str(ve))
     except FileNotFoundError as fe:
-        print(f"Error: {fe}")
         raise HTTPException(status_code=404, detail=str(fe))
     except Exception as e:
-        print(f"Error occurred while adding file: {e}")
         return error_response(error="INTERNAL_SERVER_ERROR", message=str(e))
 
 @router.delete("/apply/file/delete/{file_id}")
@@ -296,6 +292,5 @@ async def delete_file(file_id: int):
         ApplyService.delete_file(file_id)
         return success_response(message="파일이 성공적으로 삭제되었습니다.")
     except Exception as e:
-        print(f"Error occurred while adding file: {e}")
         return error_response(error="INTERNAL_SERVER_ERROR", message=str(e))
 

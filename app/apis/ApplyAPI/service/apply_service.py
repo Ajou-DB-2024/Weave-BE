@@ -353,8 +353,7 @@ class ApplyService:
 
         if os.path.exists(save_path):
             os.remove(save_path)  # 실제 파일 삭제
-        else:
-            print(f"[WARNING] File not found on disk: {save_path}")
+        
 
         # 3. answer_file에서 매핑 삭제
         ApplyRepository.delete_answer_file_mapping(file_id)
