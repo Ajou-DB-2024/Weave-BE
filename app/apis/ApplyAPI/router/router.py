@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Depends
 from fastapi import UploadFile
 from fastapi import HTTPException
 from fastapi.responses import JSONResponse
 from app.apis.ApplyAPI.service.apply_service import ApplyService
 from app.apis.ApplyAPI.model.model import RecruitSearchRequest, SubmissionSave, MemberRequest, RecruitDeadline, RecruitCreate, VoteSubmission, RecruitResultOpenRequest
+from app.apis.MemberAPI.service.auth_service import WeaveAuthService, oauth2_scheme
 
 from app.common.response.formatter import success_response, error_response
 
@@ -255,19 +256,40 @@ async def create_recruit(data: RecruitCreate, request: Request):
         # 일반 에러 처리
         return error_response(error="DATABASE_ERROR", message=str(e))
   
+# # 파일 업로드 - 기존 ver
+# @router.post("/apply/file/create")
+# async def add_file(submission_id: int, answer_id: int, file: UploadFile):
+#     """
+#     파일을 저장하고 관련 정보를 DB에 추가합니다.
+#     """
+#     try:
+#         # ApplyService에 모든 값을 전달
+#         await ApplyService.add_file(submission_id=submission_id, answer_id=answer_id, file=file)
+#         return success_response(message="파일이 성공적으로 업로드되었습니다.")
+#     except Exception as e:
+#         return error_response(error="INTERNAL_SERVER_ERROR", message=str(e))
 
-@router.post("/apply/file/create")
-async def add_file(submission_id: int, answer_id: int, file: UploadFile):
+# 파일 업로드 -new.ver
+@router.post("/apply/file/upload")
+async def upload_file(
+    file: UploadFile,
+    request: Request
+):
     """
-    파일을 저장하고 관련 정보를 DB에 추가합니다.
+    파일을 업로드하고 저장합니다.
     """
     try:
-        # ApplyService에 모든 값을 전달
-        await ApplyService.add_file(submission_id=submission_id, answer_id=answer_id, file=file)
+        # 토큰으로부터 사용자 정보 추출
+        member_info = request.state.member_info
+        member_id = member_info.get("sub")
+        member_email = member_info.get("email")
+
+        # 파일 업로드 처리
+        result = await ApplyService.add_file(file, member_id, member_email)
         return success_response(message="파일이 성공적으로 업로드되었습니다.")
+
     except Exception as e:
         return error_response(error="INTERNAL_SERVER_ERROR", message=str(e))
-
 
 @router.get("/apply/file/download/{file_id}")
 async def download_file(file_id: int):
@@ -293,4 +315,7 @@ async def delete_file(file_id: int):
         return success_response(message="파일이 성공적으로 삭제되었습니다.")
     except Exception as e:
         return error_response(error="INTERNAL_SERVER_ERROR", message=str(e))
+    
+
+
 

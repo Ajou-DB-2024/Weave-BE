@@ -1,6 +1,6 @@
 from app.db import run_query
 from datetime import datetime
-from app.apis.ApplyAPI.repository.query import SEARCH_RECRUIT, INSERT_SUBMISSION, INSERT_ANSWER, GET_SUBMISSION_ID, SELECT_QUESTION_ANSWERS, SELECT_SUBMISSION_LIST, UPDATE_SUBMISSION_STATUS, GET_ADMISSION_LIST, GET_ADMISSION_RESULT, UPDATE_SUBMISSION_RESULT, GET_CLUB_ID_FROM_RECRUIT, UPDATE_ANNOUNCEMENT_STATUS, UPDATE_RECRUIT_END_DATE, SELECT_RECRUIT_DETAIL, SELECT_RECRUIT_LIST, GET_RECRUIT_STATUS, INSERT_RECRUIT, INSERT_FILE, GET_LAST_INSERTED_FILE_ID, INSERT_ANSWER_FILE, GET_MEMBER_INFO_BY_SUBMISSION, GET_FILE_INFO_BY_ID, GET_FILE_INFO_BY_ID, DELETE_ANSWER_FILE, DELETE_FILE, GET_FILE_INFO_BY_ID
+from app.apis.ApplyAPI.repository.query import SEARCH_RECRUIT, INSERT_SUBMISSION, INSERT_ANSWER, GET_SUBMISSION_ID, SELECT_QUESTION_ANSWERS, SELECT_SUBMISSION_LIST, UPDATE_SUBMISSION_STATUS, GET_ADMISSION_LIST, GET_ADMISSION_RESULT, UPDATE_SUBMISSION_RESULT, GET_CLUB_ID_FROM_RECRUIT, UPDATE_ANNOUNCEMENT_STATUS, UPDATE_RECRUIT_END_DATE, SELECT_RECRUIT_DETAIL, SELECT_RECRUIT_LIST, GET_RECRUIT_STATUS, INSERT_RECRUIT, INSERT_FILE, GET_LAST_INSERTED_FILE_ID, INSERT_ANSWER_FILE, GET_FILE_INFO_BY_ID, GET_FILE_INFO_BY_ID, DELETE_ANSWER_FILE, DELETE_FILE, GET_FILE_INFO_BY_ID
 
 class ApplyRepository:
     @staticmethod
@@ -169,6 +169,8 @@ class ApplyRepository:
         run_query(INSERT_FILE, (save_filename, org_filename, org_extension, created_by))
         result = run_query(GET_LAST_INSERTED_FILE_ID)
         return result[0]["id"] if result else None
+    
+
         
         
     @staticmethod
@@ -179,15 +181,15 @@ class ApplyRepository:
         run_query(INSERT_ANSWER_FILE, (file_id, answer_id, submission_id))
 
     
-    @staticmethod
-    def get_member_info_by_submission(submission_id: int) -> dict:
-        """
-        submission_id를 기준으로 member의 email과 id를 가져옵니다.
-        """
-        result = run_query(GET_MEMBER_INFO_BY_SUBMISSION, (submission_id,))
-        return result[0] if result else None
+    # @staticmethod
+    # def get_member_info_by_submission(submission_id: int) -> dict:
+    #     """
+    #     submission_id를 기준으로 member의 email과 id를 가져옵니다.
+    #     """
+    #     result = run_query(GET_MEMBER_INFO_BY_SUBMISSION, (submission_id,))
+    #     return result[0] if result else None
     
-    # 파일 다운로드
+    # 파일 다운로드 - 기존_ver
     @staticmethod
     def get_file_info_by_id(file_id: int) -> dict:
         """
@@ -195,6 +197,7 @@ class ApplyRepository:
         """
         result = run_query(GET_FILE_INFO_BY_ID, (file_id,))
         return result[0] if result else None
+    
     
     @staticmethod
     def delete_answer_file_mapping(file_id: int):
