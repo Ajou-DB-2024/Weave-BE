@@ -216,3 +216,57 @@ class ApplyRepository:
         """
         result = run_query(GET_FILE_INFO_BY_ID, (file_id,))
         return result[0] if result else None
+
+# 파일 업로드  
+    @staticmethod
+    def add_file(save_filename: str, org_filename: str, org_extension: str, created_by: int) -> int:
+        """
+        파일 정보를 DB에 추가하고 생성된 file_id를 반환합니다.
+        """
+        run_query(INSERT_FILE, (save_filename, org_filename, org_extension, created_by))
+        result = run_query(GET_LAST_INSERTED_FILE_ID)
+        return result[0]["id"] if result else None
+    
+
+        
+        
+    @staticmethod
+    def map_file_to_answer(file_id: int, answer_id: int, submission_id: int):
+        """
+        파일과 ANSWER 매핑 정보를 저장합니다.
+        """
+        run_query(INSERT_ANSWER_FILE, (file_id, answer_id, submission_id))
+
+    
+  
+    # 파일 다운로드 - 기존_ver
+    @staticmethod
+    def get_file_info_by_id(file_id: int) -> dict:
+        """
+        파일 ID를 기준으로 저장된 파일 정보를 가져옵니다.
+        """
+        result = run_query(GET_FILE_INFO_BY_ID, (file_id,))
+        return result[0] if result else None
+    
+    
+    @staticmethod
+    def delete_answer_file_mapping(file_id: int):
+        """
+        answer_file 테이블에서 해당 file_id의 매핑을 삭제합니다.
+        """
+        run_query(DELETE_ANSWER_FILE, (file_id,))
+
+    @staticmethod
+    def delete_file(file_id: int):
+        """
+        file 테이블에서 해당 file_id의 파일 정보를 삭제합니다.
+        """
+        run_query(DELETE_FILE, (file_id,))
+
+    @staticmethod
+    def get_file_info_by_id(file_id: int) -> dict:
+        """
+        file_id를 기준으로 저장된 파일 경로를 가져옵니다.
+        """
+        result = run_query(GET_FILE_INFO_BY_ID, (file_id,))
+        return result[0] if result else None
