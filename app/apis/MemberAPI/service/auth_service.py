@@ -5,7 +5,7 @@ from fastapi.security import OAuth2PasswordBearer
 
 from app.apis.MemberAPI.model.GoogleToken import GoogleOAuthToken
 
-from common.utils.jwt_decode import decode_jwt_token
+from app.common.utils.jwt_decode import decode_jwt_token
 
 
 from .college_service import AjouService
