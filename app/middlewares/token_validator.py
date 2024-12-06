@@ -1,7 +1,7 @@
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi import Request, HTTPException
 from app.middlewares.log import get_logger
-from common.utils.jwt_decode import decode_jwt_token
+from app.common.utils.jwt_decode import decode_jwt_token
 
 class JWTAuthMiddleware(BaseHTTPMiddleware):
     """
