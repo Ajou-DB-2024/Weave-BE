@@ -139,3 +139,8 @@ SELECT club_id
 FROM RECRUIT
 WHERE id = %s
 """
+
+LINK_FILE_TO_ANSWER = """
+INSERT INTO ANSWER_FILE (answer_id, submission_id, file_id)
+VALUES (%s, %s, %s)
+"""

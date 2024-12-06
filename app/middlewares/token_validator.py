@@ -1,8 +1,7 @@
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi import Request, HTTPException
-import jwt
-from app.config import settings
 from app.middlewares.log import get_logger
+from app.common.utils.jwt_decode import decode_jwt_token
 
 class JWTAuthMiddleware(BaseHTTPMiddleware):
     """
@@ -24,20 +23,7 @@ class JWTAuthMiddleware(BaseHTTPMiddleware):
             raise HTTPException(status_code=401, detail="Authorization header missing or invalid")
 
         token = auth_header.split(" ")[1]
-        try:
-            # JWT 토큰 검증 및 디코딩
-            payload = jwt.decode(token, settings.TOKEN_SECRET, algorithms=[settings.TOKEN_ALGORITHM])
-            logger.info(f"JWT token is valid for member_id: {payload.get('sub')}")
-            # JWT 정보를 request.state에 저장
-            request.state.member_info = payload
-        except jwt.ExpiredSignatureError:
-            logger.warning("JWT token has expired")
-            raise HTTPException(status_code=401, detail="Token has expired")
-        except jwt.InvalidTokenError:
-            logger.warning("Invalid JWT token")
-            raise HTTPException(status_code=401, detail="Invalid token")
-        except Exception as e:
-            logger.error(f"Unexpected error in JWT validation: {e}")
-            raise HTTPException(status_code=500, detail="Internal Server Error during JWT validation")
+        payload = decode_jwt_token(token)  # 유틸리티 함수 사용
+        request.state.member_info = payload
 
         return await call_next(request)

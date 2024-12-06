@@ -27,12 +27,15 @@ class AjouService:
   def get_univ_depart(major: str):
     print(DEPART_MAP)
     try:
-      search_major = major.replace("전공", "")
+      univ_info = {}
+
+      if major not in DEPART_MAP:
+        univ_info = {
+          "college": major,
+          "department": ""
+        }
       
-      if search_major not in DEPART_MAP:
-        raise Exception
-      
-      univ_info = DEPART_MAP[search_major]
+      univ_info = DEPART_MAP[major]
       return {
         "college": univ_info['college'],
         "department": univ_info['department'],
