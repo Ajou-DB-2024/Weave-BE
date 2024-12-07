@@ -6,7 +6,7 @@ from app.common.response.formatter import error_response, success_response
 
 router = APIRouter()
 
-@router.get("/login")
+@router.get("/member/login")
 async def get_login_url():
   try:
     authorization_url = GCPService.get_auth_url()
@@ -16,7 +16,7 @@ async def get_login_url():
   except Exception as e:
     return error_response(str(e))
 
-@router.get("/login/redirect")
+@router.get("/member/login/redirect")
 async def handle_login_redirect(request: Request):  
   try:
     gcp_token_info = GCPService.get_token(request)
@@ -35,7 +35,7 @@ async def handle_login_redirect(request: Request):
     print(e)
     return error_response(str(e))
 
-@router.get("/profile")
+@router.get("/member/profile")
 async def get_logined_info(current_user: Member.Member = Depends(WeaveAuthService.digest_token)):
   return success_response(data=current_user)
   
