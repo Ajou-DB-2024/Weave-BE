@@ -243,16 +243,12 @@ class ApplyService:
         # 데이터 가공
         total_applicants = recruit_data["total_applicants"]
         draft_count = recruit_data["draft_count"]
-        
-        # 리크루팅 종료까지 남은 시간 계산
-        now = datetime.now()
         end_date = recruit_data["end_date"]
-        remaining_time = (end_date - now).total_seconds() if end_date > now else 0
 
         return {
             "total_applicants": total_applicants,
             "draft_count": draft_count,
-            "remaining_time": max(remaining_time, 0)
+            "end_date": end_date
         }
     
     @staticmethod
