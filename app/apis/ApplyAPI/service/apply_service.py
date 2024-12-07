@@ -289,8 +289,8 @@ class ApplyService:
         """
 
         # 1. 원본 파일명 및 확장자 생성
-        org_filename = file.filename
-        org_extension = os.path.splitext(org_filename)[1].lstrip(".")
+        org_filename, org_extension = os.path.splitext(file.filename)
+        org_extension = org_extension.lstrip(".")  # 확장자 앞의 점 제거
 
         # 2. 저장 파일명 생성
         timestamp = int(datetime.utcnow().timestamp())
@@ -325,7 +325,7 @@ class ApplyService:
         
         # 2. 파일 경로 확인
         save_filename = file_info["save_filename"]
-        org_filename = file_info["org_filename"]
+        org_filename = f"{file_info['org_filename']}.{file_info['org_extension']}"
         save_path = os.path.join("files", save_filename)
         
         if not os.path.exists(save_path):
