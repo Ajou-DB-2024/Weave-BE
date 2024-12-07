@@ -1,5 +1,5 @@
 SEARCH_RECRUIT = """
-SELECT r.id AS recruit_id, r.name AS recruit_name, r.start_date, r.end_date, r.status,
+SELECT r.id AS recruit_id, r.name AS recruit_name, r.start_date, r.end_date,
        c.id AS club_id, c.name AS club_name
 FROM RECRUIT r
 JOIN CLUB c ON r.club_id = c.id

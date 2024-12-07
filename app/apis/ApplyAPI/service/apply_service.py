@@ -22,7 +22,6 @@ class ApplyService:
                 "recruit_name": row["recruit_name"],
                 "start_date": row["start_date"],
                 "end_date": row["end_date"],
-                "status": row["status"],
                 "club": {
                     "club_id": row["club_id"],
                     "club_name": row["club_name"]
