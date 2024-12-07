@@ -16,7 +16,6 @@ class RecruitResponse(BaseModel):
     recruit_name: str
     start_date: Optional[str]
     end_date: Optional[str]
-    status: str
     club: ClubModel
 
 class AnswerContent(BaseModel):

@@ -1,5 +1,5 @@
 SEARCH_RECRUIT = """
-SELECT r.id AS recruit_id, r.name AS recruit_name, r.start_date, r.end_date, r.status,
+SELECT r.id AS recruit_id, r.name AS recruit_name, r.start_date, r.end_date,
        c.id AS club_id, c.name AS club_name
 FROM RECRUIT r
 JOIN CLUB c ON r.club_id = c.id
@@ -62,14 +62,13 @@ SELECT
     RECRUIT.name AS recruit_name,
     CLUB.name AS club_name,
     CLUB.club_type AS club_type,
-    RECRUIT.status AS status,
     SUM(CASE WHEN SUBMISSION.is_announced = FALSE THEN 1 ELSE 0 END) AS pending_submissions,
     SUM(CASE WHEN SUBMISSION.is_announced = TRUE THEN 1 ELSE 0 END) AS announced_submissions
 FROM SUBMISSION
 JOIN RECRUIT ON SUBMISSION.recruit_id = RECRUIT.id
 JOIN CLUB ON RECRUIT.club_id = CLUB.id
 WHERE SUBMISSION.member_id = %s
-GROUP BY RECRUIT.name, CLUB.name, CLUB.club_type, RECRUIT.status;
+GROUP BY RECRUIT.name, CLUB.name, CLUB.club_type;
 """
 
 GET_ADMISSION_RESULT = """
@@ -136,8 +135,8 @@ GROUP BY R.end_date
 """
 
 INSERT_RECRUIT = """
-INSERT INTO RECRUIT (name, start_date, end_date, form_id, club_id, status)
-VALUES (%s, %s, %s, %s, %s, 'OPEN');
+INSERT INTO RECRUIT (name, start_date, end_date, form_id, club_id)
+VALUES (%s, %s, %s, %s, %s);
 """
 
 GET_CLUB_ID_FROM_RECRUIT = """
