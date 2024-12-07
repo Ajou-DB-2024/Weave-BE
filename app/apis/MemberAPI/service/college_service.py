@@ -2,7 +2,7 @@ import json
 import os
 import traceback
 
-from app.apis.MemberAPI.repository.repository import find_member_role
+from app.apis.MemberAPI.repository.repository import find_member_role, get_member_club_brief, get_member_manage_clubs
 
 
 DEPART_MAP = {}
@@ -23,6 +23,29 @@ class AjouService:
       if not role:
           raise PermissionError("Member is not associated with the club or has no role assigned.")
       return role
+  @staticmethod
+  def get_member_club_info(member_id: int) -> dict:
+      """
+      사용자가 가입한 동아리 정보를 조회
+      """
+      from app.apis.ApplyAPI.service.apply_service import ApplyService # circular import 방지, 지연 로드
+
+      if not member_id:
+          raise ValueError("member_id is required")
+      
+      admission_list = ApplyService.get_admission_list(member_id)
+      applied_count = len(admission_list)
+
+      # 간단한 요약 정보
+      brief_info = get_member_club_brief(member_id,applied_count)
+
+      # 관리 중인 동아리 목록
+      manage_clubs = get_member_manage_clubs(member_id)
+
+      return {
+          "brief": brief_info,
+          "manage_clubs": manage_clubs
+      }
 
   def get_univ_depart(major: str):
     print(DEPART_MAP)
