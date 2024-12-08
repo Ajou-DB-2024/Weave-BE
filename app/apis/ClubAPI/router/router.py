@@ -1,7 +1,7 @@
 from fastapi import APIRouter, File, Query, UploadFile, Request
 from typing import Optional
 from fastapi.responses import FileResponse
-from app.apis.ClubAPI.service.club_service import delete_club_file, download_club_file, find_clubs, create_new_club, get_club_members, get_tags_by_catagory, update_club_information, get_club_brief, upload_clubdetail_file
+from app.apis.ClubAPI.service.club_service import delete_club_file, download_club_file, find_clubs, create_new_club, get_club_detail, get_club_members, get_tags_by_catagory, update_club_information, get_club_brief, upload_clubdetail_file
 from app.apis.ClubAPI.Models.clubmodel import ClubDetail, ClubDetailEdit
 from app.common.response.formatter import error_response, success_response
 
@@ -164,3 +164,15 @@ def get_club(
         return error_response(error="SERVER_ERROR", message=str(e))
     except ValueError as ve:
         return error_response(error="VALUES_ERROR", message=str(ve))
+
+@router.get("/club/detail")
+async def club_detail(club_id: int):
+    try:
+        # 서비스 계층에서 클럽 상세 정보를 가져옴
+        result = get_club_detail(club_id)
+        if not result:
+            raise Exception("Club not found")
+
+        return success_response(data=result, message="Club detail retrieved successfully.")
+    except Exception as e:
+        return error_response(error="SERVER_ERROR", message=f"Failed to retrieve club detail.{e}")
