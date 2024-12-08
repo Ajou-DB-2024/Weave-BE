@@ -165,7 +165,7 @@ def get_club(
     except ValueError as ve:
         return error_response(error="VALUES_ERROR", message=str(ve))
 
-@router.get("/club/detail", response_model=ClubDetailResponse)
+@router.get("/club/detail")
 async def club_detail(club_id: int):
     try:
         # 서비스 계층에서 클럽 상세 정보를 가져옴
@@ -175,4 +175,4 @@ async def club_detail(club_id: int):
 
         return success_response(data=result, message="Club detail retrieved successfully.")
     except Exception as e:
-        return error_response(error="SERVER_ERROR", message="Failed to retrieve club detail.")
+        return error_response(error="SERVER_ERROR", message=f"Failed to retrieve club detail.{e}")

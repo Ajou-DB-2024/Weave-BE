@@ -123,6 +123,35 @@ def update_club_information(club_id: int, description: Optional[str], study_coun
     #동아리 정보를 수정하는 서비스 함수.
     update_club_detail(club_id, description, study_count, award_count, edu_count, event_count, established_date, location)
 
+def get_club_detail(club_id: int) -> Optional[dict]:
+    try:
+        row = fetch_club_detail(club_id)
+
+        if not row:
+            return None  # 클럽이 없는 경우
+
+        return {
+            "id": row["club_id"],
+            "name": row["club_name"],
+            "type": row["club_type"],
+            "depart": row["club_depart"],
+            "detail": {
+                "description": row["description"],
+                "study_count": row["study_count"],
+                "award_count": row["award_count"],
+                "edu_count": row["edu_count"],
+                "event_count": row["event_count"],
+                "established_date": row["established_date"].strftime("%Y-%m-%d %H:%M:%S") if row["established_date"] else None
+            },
+            "president": {
+                "id": row["president_id"],
+                "name": row["president_name"],
+                "email": row["president_email"]
+            }
+        }
+    except Exception as e:
+        raise ValueError(f"Failed to retrieve club detail: {str(e)}")
+
 def get_club_brief(club_id: int) -> dict:    
     if not check_club_exist_by_id(club_id):
         # 클럽이 없으면 예외 발생

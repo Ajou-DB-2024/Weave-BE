@@ -4,15 +4,6 @@ from app.db import run_query
 from . import query
 
 def fetch_club_detail(club_id: int) -> Optional[dict]:
-    """
-    클럽 상세 정보를 데이터베이스에서 조회합니다.
-
-    Args:
-        club_id (int): 조회할 클럽 ID.
-
-    Returns:
-        Optional[dict]: 클럽 상세 정보 또는 None.
-    """
     try:
         result = run_query(query.GET_CLUB_DETAIL, (club_id,))
         return result[0] if result else None  # 클럽이 존재하지 않으면 None 반환

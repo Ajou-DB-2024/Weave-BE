@@ -86,13 +86,23 @@ GET_TAG = """
 CHECK_CLUB_EXIST = "SELECT * FROM CLUB WHERE id = %s"
 
 GET_CLUB_DETAIL = """
-        SELECT c.id AS club_id, c.name AS club_name, c.type AS club_type, 
-               d.name AS department_name, cd.description, cd.study_count, 
-               cd.award_count, cd.edu_count, cd.event_count, cd.established_date,
-               m.id AS president_id, m.name AS president_name, m.email AS president_email
+        SELECT 
+            c.id AS club_id,
+            c.name AS club_name,
+            c.club_type,
+            c.club_depart,
+            cd.description,
+            cd.study_count,
+            cd.award_count,
+            cd.edu_count,
+            cd.event_count,
+            cd.established_date,
+            m.id AS president_id,
+            m.name AS president_name,
+            m.email AS president_email
         FROM CLUB c
-        JOIN DEPARTMENT d ON c.department_id = d.id
         LEFT JOIN CLUB_DETAIL cd ON c.id = cd.club_id
-        LEFT JOIN MEMBER m ON c.president_id = m.id
-        WHERE c.id = %s
+        LEFT JOIN BELONGING b ON c.id = b.club_id AND b.role = 'PRESIDENT'
+        LEFT JOIN MEMBER m ON b.member_id = m.id
+        WHERE c.id = %s;
     """
