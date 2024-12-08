@@ -2,7 +2,7 @@ from datetime import datetime
 import os
 from typing import Optional
 
-from app.apis.ClubAPI.repository.repository import check_club_exist_by_id, check_club_exists, delete_file_from_db, find_club_by_name, find_clubs_by_tags, create_club, find_file_id_by_name, get_file_info, get_members_by_club_id, get_tag, map_file_to_club, save_file_to_db, unmap_file_from_club, update_club_detail, get_club_brief_summary
+from app.apis.ClubAPI.repository.repository import check_club_exist_by_id, check_club_exists, delete_file_from_db, fetch_club_detail, find_club_by_name, find_clubs_by_tags, create_club, find_file_id_by_name, get_file_info, get_members_by_club_id, get_tag, map_file_to_club, save_file_to_db, unmap_file_from_club, update_club_detail, get_club_brief_summary
 from app.apis.MemberAPI.service.college_service import AjouService
 
 FILES_DIR = "files"  # 파일 저장 경로
@@ -122,6 +122,35 @@ def update_club_information(club_id: int, description: Optional[str], study_coun
 
     #동아리 정보를 수정하는 서비스 함수.
     update_club_detail(club_id, description, study_count, award_count, edu_count, event_count, established_date, location)
+
+def get_club_detail(club_id: int) -> Optional[dict]:
+    try:
+        row = fetch_club_detail(club_id)
+
+        if not row:
+            return None  # 클럽이 없는 경우
+
+        return {
+            "id": row["club_id"],
+            "name": row["club_name"],
+            "type": row["club_type"],
+            "depart": row["club_depart"],
+            "detail": {
+                "description": row["description"],
+                "study_count": row["study_count"],
+                "award_count": row["award_count"],
+                "edu_count": row["edu_count"],
+                "event_count": row["event_count"],
+                "established_date": row["established_date"].strftime("%Y-%m-%d %H:%M:%S") if row["established_date"] else None
+            },
+            "president": {
+                "id": row["president_id"],
+                "name": row["president_name"],
+                "email": row["president_email"]
+            }
+        }
+    except Exception as e:
+        raise ValueError(f"Failed to retrieve club detail: {str(e)}")
 
 def get_club_brief(club_id: int) -> dict:    
     if not check_club_exist_by_id(club_id):

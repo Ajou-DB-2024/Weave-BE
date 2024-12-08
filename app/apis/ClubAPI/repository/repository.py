@@ -3,6 +3,13 @@ from typing import Optional
 from app.db import run_query
 from . import query
 
+def fetch_club_detail(club_id: int) -> Optional[dict]:
+    try:
+        result = run_query(query.GET_CLUB_DETAIL, (club_id,))
+        return result[0] if result else None  # 클럽이 존재하지 않으면 None 반환
+    except Exception as e:
+        raise ValueError(f"Failed to fetch club detail: {str(e)}")
+
 def find_club_by_name(name: str) -> list[dict]: 
     #동아리 이름으로 동아리 조회
     return run_query(query.CLUB_FINDBY_NAME, (f"%{name}%",))
@@ -105,20 +112,23 @@ def get_tag() -> list[dict]:
     try:
         result = run_query(query.GET_TAG)
         categories = defaultdict(list)
-    
-            # 카테고리별로 태그를 묶음
+        category_names = {}
+
+        # 카테고리별로 태그를 묶고, category_id와 category_name 매핑
         for row in result:
             categories[row['category_id']].append({
                 "id": row['tag_id'],
                 "name": row['tag_name']
             })
-        
+            # category_id에 해당하는 category_name 저장
+            category_names[row['category_id']] = row['category_name']
+
         # 카테고리별로 태그 목록을 묶은 리스트 반환
         return [{
             "category": {
-                "id": category_id, 
-                "text": result[0]['category_name']  # category_name은 result[0]에서 참조
-            }, 
+                "id": category_id,
+                "text": category_names[category_id]  # category_id에 매칭된 category_name 참조
+            },
             "selections": tags
         } for category_id, tags in categories.items()]
     except Exception as e:
