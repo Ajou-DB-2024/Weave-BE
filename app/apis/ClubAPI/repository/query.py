@@ -1,9 +1,9 @@
-CLUB_FINDBY_NAME = "SELECT id, name FROM CLUB WHERE name LIKE %s"
+CLUB_FINDBY_NAME = "SELECT id, name, club_depart, club_type FROM CLUB WHERE name LIKE %s"
 
 def CLUB_FINDBY_TAGS(tag_count: int) -> str:
     placeholders = ', '.join(['%s'] * tag_count)
     return f"""
-    SELECT DISTINCT club.id, club.name
+    SELECT DISTINCT club.id, club.name, club.club_depart, club_type
     FROM CLUB club
     JOIN TAGMAP tagmap ON club.id = tagmap.club_id
     WHERE tagmap.tag_id IN ({placeholders})
