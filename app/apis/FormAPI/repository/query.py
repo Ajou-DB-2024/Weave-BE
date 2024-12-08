@@ -28,7 +28,7 @@ WHERE r.id = %s;
 
 GET_FORMS_BY_CLUB_ID = """
 SELECT f.id AS form_id, f.title, f.created_at, r.id AS recruit_id, r.name AS recruit_name,
-       r.start_date, r.end_date, r.status
+       r.start_date, r.end_date
 FROM FORM f
 JOIN RECRUIT r ON r.form_id = f.id
 WHERE r.club_id = %s;

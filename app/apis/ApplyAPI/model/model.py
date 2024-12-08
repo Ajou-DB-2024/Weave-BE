@@ -16,17 +16,15 @@ class RecruitResponse(BaseModel):
     recruit_name: str
     start_date: Optional[str]
     end_date: Optional[str]
-    status: str
     club: ClubModel
 
 class AnswerContent(BaseModel):
     question_id: int
-    value: Optional[str]  # 답변 내용 (텍스트)
-    file_id: Optional[int]  # 첨부 파일 ID
+    value: Optional[str]  = None # 답변 내용 (텍스트)
+    file_id: Optional[int] = None # 첨부 파일 ID
 
 class SubmissionSave(BaseModel):
     recruit_id: int
-    member_id: int
     submission_title: str
     answer_content: List[AnswerContent]
 

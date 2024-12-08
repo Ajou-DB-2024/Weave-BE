@@ -7,7 +7,7 @@ from app.apis.MemberAPI.service.college_service import AjouService
 
 FILES_DIR = "files"  # 파일 저장 경로
 
-async def upload_clubdetail_file(file, user_id: int, club_id: int):
+async def upload_clubdetail_file(file, user_id: int, user_email: str, club_id: int):
     
     role = AjouService.get_member_role(user_id, club_id)
     if role not in ["PRESIDENT", "VICE_PRESIDENT"]:
@@ -18,8 +18,9 @@ async def upload_clubdetail_file(file, user_id: int, club_id: int):
         timestamp = int(datetime.utcnow().timestamp())
 
         # 파일 확장자 제거 후 파일 이름 설정
-        file_extension = file.filename.split('.')[-1]
-        save_filename = f"{timestamp}_{user_id}"
+        file_name, file_extension = os.path.splitext(file.filename)
+        file_extension = file_extension.lstrip(".")  # 확장자 앞의 점 제거
+        save_filename = f"{timestamp}_{user_email.split('@')[0]}"
 
         # 지정된 경로에 파일 저장 (확장자 제거)
         file_location = os.path.join("files", save_filename)
@@ -29,7 +30,7 @@ async def upload_clubdetail_file(file, user_id: int, club_id: int):
         # DB에 파일 정보 저장
         save_file_to_db(
             save_filename=save_filename,
-            org_filename=file.filename,
+            org_filename=file_name,
             org_extension=file_extension,
             created_by=user_id
         )

@@ -1,5 +1,5 @@
 SEARCH_RECRUIT = """
-SELECT r.id AS recruit_id, r.name AS recruit_name, r.start_date, r.end_date, r.status,
+SELECT r.id AS recruit_id, r.name AS recruit_name, r.start_date, r.end_date,
        c.id AS club_id, c.name AS club_name
 FROM RECRUIT r
 JOIN CLUB c ON r.club_id = c.id
@@ -16,6 +16,12 @@ VALUES (%s, %s, %s, %s, NOW(), FALSE, FALSE);
 INSERT_ANSWER = """
 INSERT INTO ANSWER (submission_id, question_id, value)
 VALUES (%s, %s, %s);
+"""
+
+SELECT_ANSWER = """
+SELECT id
+FROM ANSWER
+WHERE submission_id = %s AND question_id = %s;
 """
 
 GET_SUBMISSION_ID = """
@@ -56,14 +62,13 @@ SELECT
     RECRUIT.name AS recruit_name,
     CLUB.name AS club_name,
     CLUB.club_type AS club_type,
-    RECRUIT.status AS status,
     SUM(CASE WHEN SUBMISSION.is_announced = FALSE THEN 1 ELSE 0 END) AS pending_submissions,
     SUM(CASE WHEN SUBMISSION.is_announced = TRUE THEN 1 ELSE 0 END) AS announced_submissions
 FROM SUBMISSION
 JOIN RECRUIT ON SUBMISSION.recruit_id = RECRUIT.id
 JOIN CLUB ON RECRUIT.club_id = CLUB.id
 WHERE SUBMISSION.member_id = %s
-GROUP BY RECRUIT.name, CLUB.name, CLUB.club_type, RECRUIT.status;
+GROUP BY RECRUIT.name, CLUB.name, CLUB.club_type;
 """
 
 GET_ADMISSION_RESULT = """
@@ -130,8 +135,8 @@ GROUP BY R.end_date
 """
 
 INSERT_RECRUIT = """
-INSERT INTO RECRUIT (name, start_date, end_date, form_id, status)
-VALUES (%s, %s, %s, %s, 'OPEN');
+INSERT INTO RECRUIT (name, start_date, end_date, form_id, club_id)
+VALUES (%s, %s, %s, %s, %s);
 """
 
 GET_CLUB_ID_FROM_RECRUIT = """
@@ -140,7 +145,89 @@ FROM RECRUIT
 WHERE id = %s
 """
 
-LINK_FILE_TO_ANSWER = """
-INSERT INTO ANSWER_FILE (answer_id, submission_id, file_id)
+# 파일 정보를 저장
+INSERT_FILE = """
+INSERT INTO FILE (save_filename, org_filename, org_extension, created_by)
+VALUES (%s, %s, %s, %s);
+"""
+
+# ANSWER_FILE 테이블에 매핑
+INSERT_ANSWER_FILE = """
+INSERT INTO ANSWER_FILE (file_id, answer_id, submission_id)
 VALUES (%s, %s, %s)
 """
+
+
+# 방금 삽입된 AUTO_INCREMENT ID 가져오기
+GET_LAST_INSERTED_FILE_ID = """
+SELECT MAX(id) AS id FROM FILE;
+"""
+
+
+
+# 특정 파일 정보 가져오기
+GET_FILE_INFO_BY_ID = """
+SELECT save_filename, org_filename, org_extension
+FROM FILE
+WHERE id = %s;
+"""
+
+# ANSWER_FILE에서 파일 매핑 삭제
+DELETE_ANSWER_FILE = """
+DELETE FROM ANSWER_FILE
+WHERE file_id = %s;
+"""
+
+# FILE 테이블에서 파일 삭제
+DELETE_FILE = """
+DELETE FROM FILE
+WHERE id = %s;
+"""
+
+# FILE 정보 조회 (파일 경로 확인용)
+GET_FILE_INFO_BY_ID = """
+SELECT save_filename
+FROM FILE
+WHERE id = %s;
+"""
+
+# 파일 정보를 저장
+INSERT_FILE = """
+INSERT INTO FILE (save_filename, org_filename, org_extension, created_by)
+VALUES (%s, %s, %s, %s);
+"""
+
+# ANSWER_FILE 테이블에 매핑
+INSERT_ANSWER_FILE = """
+INSERT INTO ANSWER_FILE (file_id, answer_id, submission_id)
+VALUES (%s, %s, %s)
+"""
+
+
+# 방금 삽입된 AUTO_INCREMENT ID 가져오기
+GET_LAST_INSERTED_FILE_ID = """
+SELECT MAX(id) AS id FROM FILE;
+"""
+
+
+
+# 특정 파일 정보 가져오기
+GET_FILE_INFO_BY_ID = """
+SELECT save_filename, org_filename, org_extension
+FROM FILE
+WHERE id = %s;
+"""
+
+# ANSWER_FILE에서 파일 매핑 삭제
+DELETE_ANSWER_FILE = """
+DELETE FROM ANSWER_FILE
+WHERE file_id = %s;
+"""
+
+# FILE 테이블에서 파일 삭제
+DELETE_FILE = """
+DELETE FROM FILE
+WHERE id = %s;
+"""
+
+

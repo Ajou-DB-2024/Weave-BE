@@ -1,8 +1,12 @@
+from fastapi import UploadFile
+from fastapi.responses import FileResponse
 from app.apis.FormAPI.service.form_service import FormService
 from app.apis.MemberAPI.service.college_service import AjouService
 from app.apis.NotificationAPI.service.notification_service import NotificationService
 from app.apis.ApplyAPI.repository.repository import ApplyRepository
 from datetime import datetime
+
+import os
 
 class ApplyService:
     @staticmethod
@@ -18,7 +22,6 @@ class ApplyService:
                 "recruit_name": row["recruit_name"],
                 "start_date": row["start_date"],
                 "end_date": row["end_date"],
-                "status": row["status"],
                 "club": {
                     "club_id": row["club_id"],
                     "club_name": row["club_name"]
@@ -27,7 +30,7 @@ class ApplyService:
         return recruits
     
     @staticmethod
-    def save_submission(data: dict) -> dict:
+    def save_submission(data: dict, member_id: int) -> dict:
         """
         지원서를 저장합니다.
         """
@@ -39,7 +42,7 @@ class ApplyService:
         # 2. SUBMISSION 데이터 저장
         submission_id = ApplyRepository.insert_submission(
             recruit_id=data["recruit_id"],
-            member_id=data["member_id"],
+            member_id=member_id,
             form_id=form_data["form_id"],
             title=data["submission_title"]
         )
@@ -49,19 +52,15 @@ class ApplyService:
         # 3. FORM의 질문 데이터 기반으로 ANSWER 및 ANSWER_FILE 저장
         for answer_content in data["answer_content"]:
             # ANSWER 저장
-            answer_id = ApplyRepository.insert_answer(
+            ApplyRepository.insert_answer(
                 submission_id=submission_id,
                 question_id=answer_content["question_id"],
-                value=answer_content.get("value", "")
+                value=answer_content["value"]
             )
-            
+            answer_id = ApplyRepository.get_answer_id(submission_id, answer_content["question_id"])
             # ANSWER_FILE 저장 (파일이 있는 경우)
             if answer_content.get("file_id"):
-                ApplyRepository.link_file_to_answer(
-                    answer_id=answer_id,
-                    submission_id=submission_id,
-                    file_id=answer_content["file_id"]
-                )
+                ApplyRepository.map_file_to_answer(answer_content["file_id"], answer_id, submission_id)
 
         return {"submission_id": submission_id}
     
@@ -244,16 +243,12 @@ class ApplyService:
         # 데이터 가공
         total_applicants = recruit_data["total_applicants"]
         draft_count = recruit_data["draft_count"]
-        
-        # 리크루팅 종료까지 남은 시간 계산
-        now = datetime.now()
         end_date = recruit_data["end_date"]
-        remaining_time = (end_date - now).total_seconds() if end_date > now else 0
 
         return {
             "total_applicants": total_applicants,
             "draft_count": draft_count,
-            "remaining_time": max(remaining_time, 0)
+            "end_date": end_date
         }
     
     @staticmethod
@@ -277,10 +272,92 @@ class ApplyService:
             raise ValueError("선택된 폼 ID가 유효하지 않습니다.")
 
         # 리크루팅 데이터 삽입
-        ApplyRepository.insert_recruit(
-            name=data["recruit_name"],
-            start_date=data["recruit_start_date"],
-            end_date=data["recruit_end_date"],
+        ApplyRepository.create_recruit(
+            recruit_name=data["recruit_name"],
+            recruit_start_date=data["recruit_start_date"],
+            recruit_end_date=data["recruit_end_date"],
             form_id=data["form_id"],
             club_id=data["club_id"]
         )
+
+
+    # 파일 업로드 
+    @staticmethod
+    async def add_file(file: UploadFile, member_id, member_email):
+        """
+        파일을 저장하고 관련 정보를 DB에 추가합니다.
+        """
+
+        # 1. 원본 파일명 및 확장자 생성
+        org_filename, org_extension = os.path.splitext(file.filename)
+        org_extension = org_extension.lstrip(".")  # 확장자 앞의 점 제거
+
+        # 2. 저장 파일명 생성
+        timestamp = int(datetime.utcnow().timestamp())
+        save_filename = f"{timestamp}_{member_email.split('@')[0]}"
+        save_path = os.path.join("files", save_filename)
+
+        # 3. 파일 저장
+        with open(save_path, "wb") as f:
+            f.write(await file.read())
+
+        # 4. 파일 정보를 DB에 저장
+        file_id = ApplyRepository.add_file(
+            save_filename=save_filename,
+            org_filename=org_filename,
+            org_extension=org_extension,
+            created_by=member_id
+        )
+
+        return {"file_id": file_id, "message": "파일이 성공적으로 저장되었습니다."}
+
+
+    # 파일 다운로드
+    @staticmethod
+    def download_file(file_id: int) -> FileResponse:
+        """
+        파일 ID를 기준으로 파일을 찾아 다운로드를 처리합니다.
+        """
+        # 1. 파일 정보 조회
+        file_info = ApplyRepository.get_file_info_by_id(file_id)
+        if not file_info:
+            raise ValueError(f"File with ID {file_id} does not exist.")
+        
+        # 2. 파일 경로 확인
+        save_filename = file_info["save_filename"]
+        org_filename = f"{file_info['org_filename']}.{file_info['org_extension']}"
+        save_path = os.path.join("files", save_filename)
+        
+        if not os.path.exists(save_path):
+            raise FileNotFoundError(f"File not found at path: {save_path}")
+        
+        # 3. FileResponse로 파일 응답
+        return FileResponse(
+            path=save_path,
+            media_type="application/octet-stream",
+            filename=org_filename  # 원본 파일명으로 다운로드 제공
+        )
+    
+    @staticmethod
+    def delete_file(file_id: int):
+        """
+        파일을 삭제하고 관련 정보를 DB에서 제거합니다.
+        """
+        # 1. 파일 정보 조회
+        file_info = ApplyRepository.get_file_info_by_id(file_id)
+        if not file_info:
+            raise ValueError(f"File with ID {file_id} does not exist.")
+
+        # 2. 파일 경로 확인 및 삭제
+        save_filename = file_info["save_filename"]
+        save_path = os.path.join("files", save_filename)
+
+        if os.path.exists(save_path):
+            os.remove(save_path)  # 실제 파일 삭제
+        
+
+        # 3. answer_file에서 매핑 삭제
+        ApplyRepository.delete_answer_file_mapping(file_id)
+
+        # 4. file 테이블에서 파일 정보 삭제
+        ApplyRepository.delete_file(file_id)
