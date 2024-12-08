@@ -70,8 +70,7 @@ class FormService:
                     "recruit_id": row["recruit_id"],
                     "name": row["recruit_name"],
                     "start_date": row["start_date"],
-                    "end_date": row["end_date"],
-                    "status": row["status"]
+                    "end_date": row["end_date"]
                 }
             })
         return forms

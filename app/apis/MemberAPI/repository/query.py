@@ -15,3 +15,19 @@ SELECT role
 FROM BELONGING
 WHERE member_id = %s AND club_id = %s
 """
+
+GET_MEMBER_CLUB_BRIEF = """
+SELECT 
+    COUNT(DISTINCT club_id) AS join_count
+FROM BELONGING
+WHERE member_id = %s;
+"""
+
+GET_MEMBER_MANAGE_CLUBS = """
+SELECT 
+    C.id, 
+    C.name
+FROM CLUB C
+JOIN BELONGING B ON C.id = B.club_id
+WHERE B.member_id = %s AND B.role IN ('PRESIDENT', 'VICE_PRESIDENT', 'EXECUTIVE');
+"""

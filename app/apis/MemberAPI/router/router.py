@@ -2,11 +2,12 @@ from fastapi import APIRouter, Depends, Request
 
 from app.apis.MemberAPI.model import Member
 from app.apis.MemberAPI.service.auth_service import GCPService, WeaveAuthService
+from app.apis.MemberAPI.service.college_service import AjouService
 from app.common.response.formatter import error_response, success_response
 
 router = APIRouter()
 
-@router.get("/login")
+@router.get("/member/login")
 async def get_login_url():
   try:
     authorization_url = GCPService.get_auth_url()
@@ -16,7 +17,7 @@ async def get_login_url():
   except Exception as e:
     return error_response(str(e))
 
-@router.get("/login/redirect")
+@router.get("/member/login/redirect")
 async def handle_login_redirect(request: Request):  
   try:
     gcp_token_info = GCPService.get_token(request)
@@ -35,7 +36,24 @@ async def handle_login_redirect(request: Request):
     print(e)
     return error_response(str(e))
 
-@router.get("/profile")
+@router.get("/member/profile")
 async def get_logined_info(current_user: Member.Member = Depends(WeaveAuthService.digest_token)):
   return success_response(data=current_user)
-  
+
+@router.get("/member/club")
+async def get_member_clubs(request: Request):
+    """
+    사용자가 가입한 동아리 정보를 조회합니다.
+    """
+    try:
+        # JWT에서 member_id 가져오기
+        member_info = request.state.member_info
+        member_id = member_info.get("sub")
+
+        # 동아리 정보 조회
+        member_club_info = AjouService.get_member_club_info(member_id)
+        return success_response(data=member_club_info)
+    except ValueError as ve:
+        return error_response(error="VALIDATION_ERROR", message=str(ve))
+    except Exception as e:
+        return error_response(error="INTERNAL_SERVER_ERROR", message=str(e))

@@ -49,4 +49,29 @@ def find_member_role(member_id: int, club_id: int) -> str:
     result = DBQueryRunner.run_query(query.FIND_MEMBER_ROLE, (member_id, club_id))
     return result[0]["role"] if result else None
 
+@staticmethod
+def get_member_club_brief(member_id: int, applied_count: int) -> dict:
+    """
+    사용자의 요약 동아리 정보 조회
+    """
+    try:
+        # 가입한 동아리 개수 조회
+        result = DBQueryRunner.run_query(query.GET_MEMBER_CLUB_BRIEF, member_id)
+        join_count = result[0]["join_count"] if result else 0
+
+        return {
+            "join_count": join_count,
+            "applied_count": applied_count
+        }
+    except Exception as e:
+        raise Exception(f"Failed to fetch club brief info: {e}")
+
+@staticmethod
+def get_member_manage_clubs(member_id: int) -> list:
+    """
+    사용자가 관리 중인 동아리 정보 조회
+    """
+    result = DBQueryRunner.run_query(query.GET_MEMBER_MANAGE_CLUBS, (member_id,))
+    return [{"id": row["id"], "name": row["name"]} for row in result]
+
     

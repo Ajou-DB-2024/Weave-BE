@@ -83,11 +83,12 @@ async def upload_file(request: Request, club_id: int, file: UploadFile = File(..
             return error_response(error="UNAUTHORIZED", message="로그인된 사용자 정보를 찾을 수 없습니다.")
         
         logined_user_id = logined_user_info.get("sub")
+        logined_user_email = logined_user_info.get("email")
         if not logined_user_id:
             return error_response(error="UNAUTHORIZED", message="사용자 ID를 확인할 수 없습니다.")
         
         # 서비스 계층으로 파일 업로드 요청 전달
-        result = await upload_clubdetail_file(file, logined_user_id, club_id)
+        result = await upload_clubdetail_file(file, logined_user_id, logined_user_email ,club_id)
         return success_response(data=result, message="파일이 성공적으로 업로드되었습니다.")
     
     except Exception as e:

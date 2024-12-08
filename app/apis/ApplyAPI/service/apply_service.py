@@ -22,7 +22,6 @@ class ApplyService:
                 "recruit_name": row["recruit_name"],
                 "start_date": row["start_date"],
                 "end_date": row["end_date"],
-                "status": row["status"],
                 "club": {
                     "club_id": row["club_id"],
                     "club_name": row["club_name"]
@@ -244,16 +243,12 @@ class ApplyService:
         # 데이터 가공
         total_applicants = recruit_data["total_applicants"]
         draft_count = recruit_data["draft_count"]
-        
-        # 리크루팅 종료까지 남은 시간 계산
-        now = datetime.now()
         end_date = recruit_data["end_date"]
-        remaining_time = (end_date - now).total_seconds() if end_date > now else 0
 
         return {
             "total_applicants": total_applicants,
             "draft_count": draft_count,
-            "remaining_time": max(remaining_time, 0)
+            "end_date": end_date
         }
     
     @staticmethod
@@ -294,8 +289,8 @@ class ApplyService:
         """
 
         # 1. 원본 파일명 및 확장자 생성
-        org_filename = file.filename
-        org_extension = os.path.splitext(org_filename)[1].lstrip(".")
+        org_filename, org_extension = os.path.splitext(file.filename)
+        org_extension = org_extension.lstrip(".")  # 확장자 앞의 점 제거
 
         # 2. 저장 파일명 생성
         timestamp = int(datetime.utcnow().timestamp())
@@ -330,7 +325,7 @@ class ApplyService:
         
         # 2. 파일 경로 확인
         save_filename = file_info["save_filename"]
-        org_filename = file_info["org_filename"]
+        org_filename = f"{file_info['org_filename']}.{file_info['org_extension']}"
         save_path = os.path.join("files", save_filename)
         
         if not os.path.exists(save_path):
