@@ -2,7 +2,7 @@ from datetime import datetime
 import os
 from typing import Optional
 
-from app.apis.ClubAPI.repository.repository import check_club_exist_by_id, check_club_exists, delete_file_from_db, find_club_by_name, find_clubs_by_tags, create_club, find_file_id_by_name, get_file_info, get_members_by_club_id, get_tag, map_file_to_club, save_file_to_db, unmap_file_from_club, update_club_detail, get_club_brief_summary
+from app.apis.ClubAPI.repository.repository import check_club_exist_by_id, check_club_exists, delete_file_from_db, fetch_club_detail, find_club_by_name, find_clubs_by_tags, create_club, find_file_id_by_name, get_file_info, get_members_by_club_id, get_tag, map_file_to_club, save_file_to_db, unmap_file_from_club, update_club_detail, get_club_brief_summary
 from app.apis.MemberAPI.service.college_service import AjouService
 
 FILES_DIR = "files"  # 파일 저장 경로
