@@ -1,7 +1,9 @@
 from starlette.middleware.base import BaseHTTPMiddleware
-from fastapi import Request, HTTPException
+from fastapi import Request
+from fastapi.responses import JSONResponse
 from app.middlewares.log import get_logger
 from app.common.utils.jwt_decode import decode_jwt_token
+from app.common.response.formatter import error_response
 
 class JWTAuthMiddleware(BaseHTTPMiddleware):
     """
@@ -20,10 +22,27 @@ class JWTAuthMiddleware(BaseHTTPMiddleware):
         auth_header = request.headers.get("Authorization")
         if not auth_header or not auth_header.startswith("Bearer "):
             logger.warning("Authorization header missing or invalid")
-            raise HTTPException(status_code=401, detail="Authorization header missing or invalid")
+            return JSONResponse(
+                status_code=401,
+                content=error_response(
+                    error="MISSING_AUTH_HEADER",
+                    message="Authorization header is missing or invalid."
+                )
+            )
 
         token = auth_header.split(" ")[1]
-        payload = decode_jwt_token(token)  # 유틸리티 함수 사용
-        request.state.member_info = payload
+        try:
+            # JWT 토큰 디코딩
+            payload = decode_jwt_token(token)
+            request.state.member_info = payload
+        except Exception as e:
+            logger.error(f"Unexpected error during token validation: {e}")
+            return JSONResponse(
+                status_code=401,
+                content=error_response(
+                    error="INVALID_TOKEN",
+                    message="The provided token is invalid or expired."
+                )
+            )
 
         return await call_next(request)
