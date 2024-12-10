@@ -13,7 +13,7 @@ class JWTAuthMiddleware(BaseHTTPMiddleware):
         logger = get_logger("JWTAuthMiddleware")
 
         # Swagger UI 및 OpenAPI 문서 요청, TestAPI 요청은 예외 처리
-        excluded_paths = ["/docs", "/openapi.json", "/api/v0/test", "/api/v0/member/login"]
+        excluded_paths = ["/docs", "/openapi.json", "/api/v0/test", "/api/v0/member/login", "/redoc"]
         if any(request.url.path.startswith(path) for path in excluded_paths):
             logger.info(f"Skipping JWT validation for path: {request.url.path}")
             return await call_next(request)
