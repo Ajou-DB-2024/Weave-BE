@@ -49,9 +49,9 @@ class GCPService:
       raise HTTPException(status_code=400, detail="Code not found")
     
     # 토큰 요청을 위한 데이터
-    host = request.client.host
-    if host == "127.0.0.1":
-      host = "localhost"
+    #host = request.client.host
+    #if host == "127.0.0.1":
+    #  host = "localhost"
     
     token_data = {
         'code': code,
